@@ -1,13 +1,13 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 {% block content %}
 {% if current_user.is_authenticated %}
 
-<p>Logged in as {{current_user}}</p>
-<a href="/logout">Logout</a> 
+<h2>Logged in as {{current_user}}</h2>
+<a class="btn btn-primary" href="/logout" role="button">Log out</a>
 
 {% else %}
-<p>Not logged in!</p>
-<a href="/login">Login</a> 
 
+<h2>Unfortunately, you are not logged in</h2>
+<a class="btn btn-primary" href="/login" role="button">Log in</a>
 {% endif %}
 {% endblock %}

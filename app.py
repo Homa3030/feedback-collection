@@ -40,7 +40,7 @@ def load_user(user_id):
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', title='Login')
     else:
         mail = request.form['email']
         password = request.form['password']
@@ -49,6 +49,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         else:
+
             return 'Invalid email or password'
 
 
@@ -61,7 +62,7 @@ def logout():
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template('index.html', title='Home')
 
 
 if __name__ == "__main__":
