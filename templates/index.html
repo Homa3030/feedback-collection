@@ -6,11 +6,12 @@
   <div class="media">
     <img class="rounded-circle account-img" src="static/default.png">
     <div class="media-body">
-      <h2 class="account-heading">'Username' </h2>
-      <p class="text-secondary">'username@email.com' </p>
+      <h2 class="account-heading">{{ current_user.name }} </h2>
+      <p class="text-secondary">{{ current_user.email }} </p>
     </div>
   </div>
     <p class="text-secondary">Rating </p>
+    <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>

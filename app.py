@@ -58,10 +58,6 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route("/userpage")
-def user():
-    return render_template('userpage.html')
-
 @app.route("/constructor")
 def constructor():
     return render_template('questions constructor.html', title="Constructor")
