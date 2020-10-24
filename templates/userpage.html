@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
-{% block content %}
-{% if current_user.is_authenticated %}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{%  block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div class="content-section">
   <div class="media">
     <img class="rounded-circle account-img" src="static/default.png">
@@ -20,8 +19,4 @@
        <a class="btn btn-primary" href="/constructor" role="button">Create survey</a>
        <a class="btn btn-primary" href="/statistics" role="button">See Statistics</a>
     </div>
-    {% else %}
-<h2>Unfortunately, you are not logged in</h2>
-<a class="btn btn-primary" href="/login" role="button">Log in</a>
-{% endif %}
 {% endblock %}
