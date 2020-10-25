@@ -52,6 +52,7 @@ class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
 
+
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
     form_template_id = Form.query.get(form_id).template_id
@@ -70,6 +71,37 @@ def save_form_as_template(form_id):
         db.session.add(new_question)
 
     db.session.commit()
+
+
+def add_question(form_id, question, answers):
+    new_question = Question()
+    new_question.question = question
+    new_question.answers = answers
+    new_question.template_id = form_id
+
+    db.session.add(new_question)
+    db.commit()
+
+
+def delete_question(form_id, question_id):
+    questions = FormTemplate.query.get(form_id).questions
+
+    for question in questions:
+        if int(question.id) == int(question_id):
+            db.session.delete(question)
+            db.session.commit()
+            break
+
+
+def change_question(form_id, question_id, new_question_string, answers):
+    questions = FormTemplate.query.get(form_id).questions
+    for question in questions:
+        if int(question.id) == int(question_id):
+            question.question = new_question_string
+            question.answers = answers
+            db.session.commit()
+            break
+   
 
 
 @login_manager.user_loader
