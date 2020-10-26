@@ -120,8 +120,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         else:
-
-            return 'Invalid email or password'
+            return render_template('incorrect.html', title='Invalid credentials')
 
 
 
@@ -130,7 +129,13 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route("/constructor")
+def constructor():
+    return render_template('questions constructor.html', title="Constructor")
 
+@app.route("/statistics")
+def statistics():
+    return render_template('statistics.html', title="Statistics")
 @app.route("/")
 def home():
     return render_template('index.html', title='Home')

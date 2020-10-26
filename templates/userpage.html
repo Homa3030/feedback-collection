@@ -1,17 +1,15 @@
 {% extends "layout.html" %}
-{% block content %}
-{% if current_user.is_authenticated %}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{%  block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div class="content-section">
   <div class="media">
     <img class="rounded-circle account-img" src="static/default.png">
     <div class="media-body">
-      <h2 class="account-heading">{{ current_user.name }} </h2>
-      <p class="text-secondary">{{ current_user.email }} </p>
+      <h2 class="account-heading">'Username' </h2>
+      <p class="text-secondary">'username@email.com' </p>
     </div>
   </div>
     <p class="text-secondary">Rating </p>
-    <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
@@ -21,8 +19,4 @@
        <a class="btn btn-primary" href="/constructor" role="button">Create survey</a>
        <a class="btn btn-primary" href="/statistics" role="button">See Statistics</a>
     </div>
-    {% else %}
-<h2>Unfortunately, you are not logged in</h2>
-<a class="btn btn-primary" href="/login" role="button">Log in</a>
-{% endif %}
 {% endblock %}
