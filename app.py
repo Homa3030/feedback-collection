@@ -52,7 +52,7 @@ class FormTemplate(db.Model):
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    results = db.relationship('Result', backref='list_of_res')
+    result = db.Column(db.Integer, db.ForeignKey('form_template.id'))
 
 
 class Result(db.Model):
