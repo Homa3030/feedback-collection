@@ -1,5 +1,6 @@
 from flask import Flask, url_for, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func;
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
 from flask_migrate import Migrate
 import os
@@ -105,14 +106,38 @@ def save_form_as_template(form_id):
     db.session.commit()
 
 
-def add_question(form_id, question, answers):
+@app.route('/add_question', methods=['GET'])
+def add_question():
+    form_id = request.args.get('form_id')
+    question = request.args.get('question')
+    answers_string = request.args.get('answers')
+
     new_question = Question()
     new_question.question = question
-    new_question.answers = answers
+    if answers_string is None:
+        new_question.answers = {}
+    else:
+        answer_array = []
+        answer_temp = ""
+        i = 0
+        while i != len(answers_string):
+            if answers_string[i] == ',':
+                answer_array.append(answer_temp)
+                answer_temp = ""
+                i += 1
+                continue
+            answer_temp += answers_string[i]
+            i += 1
+        if answer_temp != ",":
+            answer_array.append(answer_temp)
+        new_question.answers = answer_array
+
+
     new_question.template_id = form_id
 
     db.session.add(new_question)
-    db.commit()
+    db.session.commit()
+    return True
 
 
 def delete_question(form_id, question_id):
@@ -165,7 +190,8 @@ def logout():
 
 @app.route("/constructor")
 def constructor():
-    return render_template('questions constructor.html', title="Constructor")
+    form_id = db.session.query(func.max(Form.id)).scalar()
+    return render_template('questions constructor.html', title="Constructor", formID=form_id)
 
 
 @app.route("/statistics")

@@ -4,12 +4,12 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div class="content-section">
   <div class="media">
-    <img class="rounded-circle account-img" src="static/default.png">
-    <div class="media-body">
-      <h2 class="account-heading">{{ current_user.name }} </h2>
-      <p class="text-secondary">{{ current_user.email }} </p>
-    </div>
+  <img class="rounded-circle account-img" src="static/default.png">
+  <div class="media-body">
+    <h2 class="account-heading">{{ current_user.name + " " + current_user.surname}} </h2>
+    <p class="text-secondary">{{ current_user.mail }} </p>
   </div>
+</div>
     <p class="text-secondary">Rating </p>
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
