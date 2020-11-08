@@ -53,28 +53,23 @@ class FormTemplate(db.Model):
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    results = db.relationship('Result', backref='list_of_res')
+    result = db.Column(db.Integer, db.ForeignKey('form_template.id'))
 
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     form_id = db.Column(db.Integer, db.ForeignKey('form.id'))
     grades = db.relationship('Grade', backref='grade_for_res')
-    average_grade = db.Column(db.Float, default=0)
 
     @classmethod
     def calculate_average(cls, id):
         grades_arr = cls.query.get(id).grades
-        size = 0
-        sum = 0
-        for grade in grades_arr:
-            sum += grade.grade
-            size += 1
-        if size == 0:
-            average_grade = 0
-        else:
-            average_grade = sum / size
+        count = len(grades_arr)
 
+        if count == 0:
+            return 0
+        else:
+            return sum([g.grade for g in grades_arr]) / count
 
 class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,7 +79,6 @@ class Grade(db.Model):
 
 with app.app_context():
     db.create_all()
-
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
