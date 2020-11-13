@@ -52,9 +52,22 @@ class FormTemplate(db.Model):
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    result = db.Column(db.Integer, db.ForeignKey('form_template.id'))
+    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
 
+@app.route('/create_form', methods=['POST'])
+def create_form():
+    new_template = FormTemplate()
+    new_template.visible = False
+    db.session.add(new_template)
+    db.session.commit()
+
+    new_form = Form()
+    new_form.template_id = new_template.id
+    db.session.add(new_form)
+    db.session.commit()
+
+
+    return str(new_form.id)
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
