@@ -1,4 +1,4 @@
-from flask import Flask, url_for, render_template, request, redirect, session
+from flask import Flask, url_for, render_template, request, redirect, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func;
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     mail = db.Column(db.String(32), nullable=False)
     password = db.Column(db.String(32), nullable=False)
     type = db.Column(db.Integer, nullable=False)
+    forms = db.relationship('FormTemplate', backref='user_form_temp')
 
     @classmethod
     def get(cls, id):
@@ -41,6 +42,7 @@ class Question(db.Model):
     question = db.Column(db.String, nullable=False)
     answers = db.Column(db.ARRAY(db.String), nullable=False)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
+    question_order = db.Column(db.Integer, default=0)
     # If question is open-ended then answers = {} (empty array)
 
 
@@ -48,12 +50,13 @@ class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     questions = db.relationship('Question', backref='form_template')
     visible = db.Column(db.Boolean, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    result = db.Column(db.Integer, db.ForeignKey('form_template.id'))
+    result = db.Column(db.Integer, db.ForeignKey('result.id'))
 
 
 class Result(db.Model):
@@ -71,6 +74,7 @@ class Result(db.Model):
         else:
             return sum([g.grade for g in grades_arr]) / count
 
+
 class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     result_id = db.Column(db.Integer, db.ForeignKey('result.id'), nullable=False)
@@ -79,6 +83,7 @@ class Grade(db.Model):
 
 with app.app_context():
     db.create_all()
+
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
@@ -100,7 +105,7 @@ def save_form_as_template(form_id):
     db.session.commit()
 
 
-@app.route('/add_question', methods=['GET'])
+@app.route('/add_question', methods=['POST'])
 def add_question():
     form_id = request.args.get('form_id')
     question = request.args.get('question')
@@ -126,15 +131,20 @@ def add_question():
             answer_array.append(answer_temp)
         new_question.answers = answer_array
 
-
     new_question.template_id = form_id
 
     db.session.add(new_question)
     db.session.commit()
-    return True
+
+    ret = db.session.query(func.max(Question.id)).scalar()
+    print(ret)
+    return jsonify({"id" : ret})
 
 
-def delete_question(form_id, question_id):
+@app.route('/delete_question', methods=['POST'])
+def delete_question():
+    form_id = request.args.get('form_id')
+    question_id = request.args.get('question_id')
     questions = FormTemplate.query.get(form_id).questions
 
     for question in questions:
@@ -142,6 +152,7 @@ def delete_question(form_id, question_id):
             db.session.delete(question)
             db.session.commit()
             break
+    return "Ok"
 
 
 def change_question(form_id, question_id, new_question_string, answers):
@@ -184,8 +195,8 @@ def logout():
 
 @app.route("/constructor")
 def constructor():
-    form_id = db.session.query(func.max(Form.id)).scalar()
-    return render_template('questions constructor.html', title="Constructor", formID=form_id)
+    form_id = db.session.query(func.max(FormTemplate.id)).scalar()
+    return render_template('questions constructor.html', title="Constructor", formID=form_id, question_id=1)
 
 
 @app.route("/statistics")
