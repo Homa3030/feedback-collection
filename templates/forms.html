@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>Your Surveys</h2>
+    <div  id="form"></div>
+
+    <script>
+var i;
+var html;
+var form =[1,2,3,4,5,6];
+for (i = 0; i < form.length; i++) {
+  html = '<div class="list-group">\n' +
+      '  <a title= "Press to edit feedback form" href="/Editor" class="list-group-item list-group-item-action active mb-3 ">' + form[i] + '</a>\n' +
+      '</div>'
+    document.getElementById('form').innerHTML += html;
+}
+
+
+</script>
+{% endblock %}

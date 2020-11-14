@@ -1,4 +1,4 @@
-from flask import Flask, url_for, render_template, request, redirect, session, jsonify
+from flask import Flask, url_for, render_template, request, redirect, session, jsonify, json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func;
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
     # 0 - DOE
     # 1 - Professor/TA
     # 2 - Student
-    def __repr__(self):
+    def repr(self):
         return '%s %s, %s' % (self.name, self.surname, self.mail)
 
 
@@ -51,6 +51,8 @@ class FormTemplate(db.Model):
     questions = db.relationship('Question', backref='form_template')
     visible = db.Column(db.Boolean, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    label = db.Column(db.String(32), nullable=False)
+
 
 
 class Form(db.Model):
@@ -85,10 +87,11 @@ with app.app_context():
 
 
 ##@app.route('/create_form', methods=['POST'])
-def create_form(user):
+def create_form(user, name):
     new_template = FormTemplate()
     new_template.visible = False
     new_template.user_id = user
+    new_template.label = name + str(new_template.id)
     db.session.add(new_template)
     db.session.commit()
 
@@ -223,13 +226,29 @@ def logout():
 
 @app.route("/constructor")
 def constructor():
-    return render_template('questions constructor.html', title="Constructor", formID=create_form(1))
+    return render_template('questions constructor.html', title="Constructor", formID=create_form(1, "template"))
 
 
 @app.route("/statistics")
 def statistics():
     return render_template('statistics.html', title="Statistics")
 
+@app.route("/forms/<id>")
+def forms(id):
+    own_temp = FormTemplate.query.filter_by(user_id=id, visible=True).all()
+    array = []
+    for temp in own_temp:
+        dic = {
+            "id": temp.id,
+            "label": temp.label
+        }
+        print(dic)
+        array.append(dic)
+    return render_template('forms.html', title="My Feedback Form", list=json.dumps(array))
+
+@app.route("/Editor")
+def editor():
+    return render_template('Editor.html', title="Edit")
 
 @app.route("/")
 def home():
