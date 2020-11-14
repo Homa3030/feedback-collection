@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>Editor</h2>
+
+
+
+    <div class="modal fade" id="OpenEnded" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Question</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="question" class="col-form-label">Question:</label>
+            <input type="text" class="form-control" id="Oquestion" value="">
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Comment:</label>
+            <textarea class="form-control" id="CommentO"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="SaveOQ" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+   <div  id="edit">
+
+   </div>
+
+    <script>
+function displayOpenQuestion(question, comment) {
+    //var question = document.getElementById('Oquestion').value;
+    var question = question;
+    //var comment = document.getElementById('CommentO').value;
+    var comment = comment;
+
+    var html = '<div class="card mb-3" style="max-width: 20rem;">\n' +
+        '  <div class="card-header">Open Ended Question</div>\n' +
+        '  <div class="card-body">\n' +
+        '    <h5 class="card-title">'+question+'</h5>\n' +
+        '    <p class="text-muted">Comment: '+comment+'</p>\n' +
+        '  </div>\n' + '<button type="button" data-toggle="modal" data-target="#OpenEnded" onclick="editQuestion(1,question,comment)" class="btn btn-primary mb-2">Edit</button>' +
+         '<button type="button" onclick="deleteQuestion()" class="btn btn-danger">Delete</button>'
+        '</div>';
+
+    document.getElementById('edit').innerHTML += html;
+
+}
+function editQuestion(id,question, comment){
+
+    //var input = document.getElementById ("Oquestion");
+    //input.placeholder = "No need to fill this field";
+    document.getElementById('Oquestion').value = "Johnny Bravo";
+    ('#OpenEnded').modal('show');
+
+
+}
+function deleteQuestion(id){
+    document.getElementById('edit').innerHTML = '';
+    displayClosedQuestion("sfsds","sf","dfd","dfd");
+}
+function displayClosedQuestion(question, var1,var2,var3) {
+    var question = question;
+    var var1 = var1;
+    var var2 = var2;
+    var var3 = var3;
+
+    var html = '<div class="card mb-3" style="max-width: 20rem;">\n' +
+        '  <div class="card-header">Closed Ended Question</div>\n' +
+        '  <div class="card-body">\n' +
+        '    <h5 class="card-title">'+question+'</h5>\n' +
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var1 +
+        '  </label>\n' +
+        '</div>\n' +
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var2 +
+        '  </label>\n' +
+        '</div>\n'+
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var3 +
+        '  </label>\n' +
+        '</div>\n' +
+        '  </div>\n' + '<button type="button" data-toggle="modal" data-target="#ClosedEnded" class="btn btn-primary mb-2">Edit</button>' +
+         '<button type="button" class="btn btn-danger">Delete</button>' +
+        '</div>';
+
+    document.getElementById('edit').innerHTML += html;
+
+
+}
+displayOpenQuestion("dsfsfs","Sfsfsfs");
+displayClosedQuestion("sfsds","sf","dfd","dfd");
+</script>
+{% endblock %}
