@@ -44,15 +44,23 @@ class Question(db.Model):
     # If question is open-ended then answers = {} (empty array)
 
 
+class Answer(db.Model):
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), primary_key=True)
+    filler_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    answer = db.Column(db.String, nullable=False)
+
+
 class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    questions = db.relationship('Question', backref='form_template')
+    questions = db.relationship('Question', backref='form_template_questions')
     visible = db.Column(db.Boolean, nullable=False)
 
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
 
 @app.route('/create_form', methods=['POST'])
 def create_form():
@@ -92,6 +100,19 @@ class Grade(db.Model):
 
 with app.app_context():
     db.create_all()
+
+
+@app.route('/fill_form/<form_id>', methods=['GET'])
+def get_form_page(form_id):
+    Form.query.get_or_404(form_id)
+    return f'Here should be a page to fill the form {form_id}.'
+
+
+@app.route('/get_relative_link/<form_id>', methods=['GET'])
+def get_relative_link(form_id):
+    Form.query.get_or_404(form_id)
+    return f'/fill_form/{form_id}'
+
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
