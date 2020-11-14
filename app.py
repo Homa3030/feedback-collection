@@ -55,8 +55,7 @@ class FormTemplate(db.Model):
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    result = db.Column(db.Integer, db.ForeignKey('result.id'))
+    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
 
 
 class Result(db.Model):
@@ -83,6 +82,23 @@ class Grade(db.Model):
 
 with app.app_context():
     db.create_all()
+
+
+##@app.route('/create_form', methods=['POST'])
+def create_form(user):
+    new_template = FormTemplate()
+    new_template.visible = False
+    new_template.user_id = user
+    db.session.add(new_template)
+    db.session.commit()
+
+    new_form = Form()
+    new_form.template_id = new_template.id
+    db.session.add(new_form)
+    db.session.commit()
+
+
+    return str(new_template.id)
 
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
@@ -195,8 +211,7 @@ def logout():
 
 @app.route("/constructor")
 def constructor():
-    form_id = db.session.query(func.max(FormTemplate.id)).scalar()
-    return render_template('questions constructor.html', title="Constructor", formID=form_id, question_id=1)
+    return render_template('questions constructor.html', title="Constructor", formID=create_form(1))
 
 
 @app.route("/statistics")
