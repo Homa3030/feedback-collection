@@ -204,7 +204,7 @@ def forms():
 
 @app.route("/Editor")
 def editor():
-    return render_template('Editor.html', title="Edit")
+    return render_template(' Editor.html', title="Edit")
 
 @app.route("/")
 def home():
