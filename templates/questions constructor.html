@@ -124,53 +124,13 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <a class="btn btn-primary" href="/" role="button">Finish</a>
+        <a class="btn btn-primary" href="/" role="button" id="SaveTemp">Finish</a>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-var num_q = 0;
-
-function delete_q(str_id, form_id, id){
-  $(str_id).remove();
-      xmlhttp = new XMLHttpRequest();
-      theUrl = "/delete_question?form_id=" + form_id + "&question_id=" + id;
-      xmlhttp.open("POST", theUrl, false);
-      xmlhttp.send();
-}
-
-// alert('ex1');
-// $('body').on('click', '.remove-button', function () {
-//       $(this).parent().parent().remove();
-//     });
-// alert('ex2');
-
-function temp_openQuestion(){
-  var question = document.getElementById('Oquestion').value;
-    var comment = document.getElementById('CommentO').value;
-    var id = num_q;
-    var html = '<div class="card mb-3" id="oq'+ String(id) +'" style="max-width: 20rem;">\n' +
-        '  <div class="card-header">Open Ended Question</div>\n' +
-        '  <div class="card-body">\n' +
-        '    <h5 class="card-title">'+question+'</h5>\n' +
-        '    <p class="text-muted">Comment: '+comment+'</p>\n' +
-        '    <button type="button" id="but'+ String(id)+'" class="remove-button">Delete</button>\n'+
-        '  </div>\n' +
-        '</div>';
-
-    document.getElementById('survey').innerHTML += html;
-    $('#survey').on('click', '.remove-button', function () {
-       $(this).parent().parent().remove();
-     });
-    num_q += 1;
-}
-
-function temp_deleteOQ(id){
-  $('#oq' + String(id)).remove();
-}
-
 function openQuestion() {
     var question = document.getElementById('Oquestion').value;
     var comment = document.getElementById('CommentO').value;
@@ -302,6 +262,13 @@ function closedQuestion() {
     document.getElementById('SaveOQ').addEventListener('click', openQuestion);
     document.getElementById('SaveCQ').addEventListener('click', closedQuestion);
     document.getElementById('SaveC').addEventListener('click', comment);
+    document.getElementById('SaveTemp').addEventListener('click', function(){
+      var id = {{formID}};
+      theUrl = '/save_form_as_template/' + id;
+      xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", theUrl, false);
+      xmlhttp.send();
+    });
     
 </script>
 {% endblock %}

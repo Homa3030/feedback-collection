@@ -103,22 +103,34 @@ def create_form(user):
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
-    form_template_id = Form.query.get(form_id).template_id
+    ## My way
+    ## here we only change the visibilty of form template without duplicating form_template 
+    ## and all questions of this form_template
 
-    new_form_template = FormTemplate()
-    new_form_template.visible = True
-    db.session.add(new_form_template)
-
-    questions = FormTemplate.query.get(form_template_id).questions
-
-    for question in questions:
-        new_question = Question()
-        new_question.question = question.question
-        new_question.answers = question.answers
-        new_question.template_id = new_form_template.id
-        db.session.add(new_question)
-
+    form_temp = FormTemplate.query.filter_by(id=form_id).first()
+    form_temp.visible = True
     db.session.commit()
+    return "OK"
+
+    ## Regina way
+    ## here we create new form_template and also duplicate all questions(related to form_template with form_id)
+
+    # form_template_id = Form.query.get(form_id).template_id
+
+    # new_form_template = FormTemplate()
+    # new_form_template.visible = True
+    # db.session.add(new_form_template)
+
+    # questions = FormTemplate.query.get(form_template_id).questions
+
+    # for question in questions:
+    #     new_question = Question()
+    #     new_question.question = question.question
+    #     new_question.answers = question.answers
+    #     new_question.template_id = new_form_template.id
+    #     db.session.add(new_question)
+
+    # db.session.commit()
 
 
 @app.route('/add_question', methods=['POST'])
