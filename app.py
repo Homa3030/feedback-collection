@@ -44,38 +44,52 @@ class Question(db.Model):
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
     # If question is open-ended then answers = {} (empty array)
 
+class Answer(db.Model):
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), primary_key=True)
+    filler_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    answer = db.Column(db.String, nullable=False)
 
 class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    questions = db.relationship('Question', backref='form_template')
+    questions = db.relationship('Question', backref='form_template_questions')
     visible = db.Column(db.Boolean, nullable=False)
 
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'))
-    results = db.relationship('Result', backref='list_of_res')
+    template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
 
+@app.route('/create_form', methods=['POST'])
+def create_form():
+    new_template = FormTemplate()
+    new_template.visible = False
+    db.session.add(new_template)
+    db.session.commit()
+
+    new_form = Form()
+    new_form.template_id = new_template.id
+    db.session.add(new_form)
+    db.session.commit()
+
+
+    return str(new_form.id)
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     form_id = db.Column(db.Integer, db.ForeignKey('form.id'))
     grades = db.relationship('Grade', backref='grade_for_res')
-    average_grade = db.Column(db.Float, default=0)
 
     @classmethod
     def calculate_average(cls, id):
         grades_arr = cls.query.get(id).grades
-        size = 0
-        sum = 0
-        for grade in grades_arr:
-            sum += grade.grade
-            size += 1
-        if size == 0:
-            average_grade = 0
-        else:
-            average_grade = sum / size
+        count = len(grades_arr)
 
+        if count == 0:
+            return 0
+        else:
+            return sum([g.grade for g in grades_arr]) / count
 
 class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,6 +99,18 @@ class Grade(db.Model):
 
 with app.app_context():
     db.create_all()
+
+
+@app.route('/fill_form/<form_id>', methods=['GET'])
+def get_form_page(form_id):
+    Form.query.get_or_404(form_id)
+    return f'Here should be a page to fill the form {form_id}.'
+
+
+@app.route('/get_relative_link/<form_id>', methods=['GET'])
+def get_relative_link(form_id):
+    Form.query.get_or_404(form_id)
+    return f'/fill_form/{form_id}'
 
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
@@ -107,7 +133,7 @@ def save_form_as_template(form_id):
     db.session.commit()
 
 
-@app.route('/add_question')
+@app.route('/add_question', methods=['GET'])
 def add_question():
     form_id = request.args.get('form_id')
     question = request.args.get('question')
@@ -138,6 +164,8 @@ def add_question():
 
     db.session.add(new_question)
     db.session.commit()
+    
+    return True
 
 
 def delete_question(form_id, question_id):
@@ -212,7 +240,6 @@ def responds():
 @app.route("/Answers")
 def answers():
     return render_template('Answers.html', title="Answers")
-
 
 @app.route("/")
 def home():
