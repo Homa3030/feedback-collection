@@ -1,4 +1,248 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>To be added</h2>
+<h2 id="header">Question constructor</h2>
+<div id="FeedbackName"></div>
+     <div id="NameFeedback" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please,enter the name of feedback form</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Name"id="Name" >
+                    </div>
+
+                     <a class="btn btn-secondary" href="/" role="button">Cancel</a>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="displayName()">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="btn-group">
+
+      <button type="button" class="btn btn-primary dropdown-toggle mb-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Choose type of question
+      </button>
+
+  <div class="dropdown-menu">
+      <button type="button" class="dropdown-item" data-toggle="modal" data-target="#OpenEnded" >Open ended questions</button>
+    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#ClosedEnded" >Closed ended questions</button>
+
+    <div class="dropdown-divider"></div>
+    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#Comment" >Add comment</button>
+  </div>
+</div>
+
+    <div class="modal fade" id="Comment" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Comment</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Comment:</label>
+            <textarea class="form-control" id="Comment1"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="SaveC" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="modal fade" id="ClosedEnded" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Question</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="question" class="col-form-label">Question:</label>
+            <input type="text" class="form-control" id="Cquestion">
+          </div>
+        </form>
+            <input type="text" class="form-control" id="Variant1" placeholder="Add possible variant">
+            <input type="text" class="form-control" id="Variant2" placeholder="Add possible variant">
+            <input type="text" class="form-control" id="Variant3" placeholder="Add possible variant">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="SaveCQ">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="OpenEnded" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Question</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="question" class="col-form-label">Question:</label>
+            <input type="text" class="form-control" id="Oquestion">
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Comment:</label>
+            <textarea class="form-control" id="CommentO"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="SaveOQ" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div  id="survey"></div>
+    <div>
+
+
+    </div>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+ Save
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <a class="btn btn-primary" href="/" role="button">Finish</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script>
+function openQuestion() {
+    var question = document.getElementById('Oquestion').value;
+    var comment = document.getElementById('CommentO').value;
+
+    var html = '<div class="card mb-3" style="max-width: 20rem;">\n' +
+        '  <div class="card-header">Open Ended Question</div>\n' +
+        '  <div class="card-body">\n' +
+        '    <h5 class="card-title">'+question+'</h5>\n' +
+        '    <p class="text-muted">Comment: '+comment+'</p>\n' +
+        '  </div>\n' +
+        '</div>';
+
+    document.getElementById('survey').innerHTML += html;
+
+    var FormID = {{formID}}
+    theUrl='/add_question?form_id=' + FormID + '&question=' + question;
+
+    var xmlHttp = new XMLHttpRequest();
+    while (!(xmlHttp.readyState == 4 && xmlHttp.status == 200)){
+      xmlHttp.open("GET", theUrl, true); // true for asynchronous
+      xmlHttp.send(null);
+      break;
+    }
+
+}
+function displayName() {
+    var html='<h3>' + document.getElementById('Name').value + '</h3>';
+   document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
+}
+function comment() {
+    var comment = document.getElementById('Comment1').value;
+
+
+    var html = '<div class="card shadow p-3 mb-3 bg-white rounded" style="max-width: 20rem;">\n' +
+        '  <div class="card-header">Comment</div>\n' +
+        '  <div class="card-body">\n' +
+        '    <h5 class="card-title">'+comment+'</h5>\n' +
+        '  </div>\n' +
+        '</div>';
+
+    document.getElementById('survey').innerHTML += html;
+
+
+
+
+}
+function closedQuestion() {
+    var question = document.getElementById('Cquestion').value;
+    var var1 = document.getElementById('Variant1').value;
+    var var2 = document.getElementById('Variant2').value;
+    var var3 = document.getElementById('Variant3').value;
+
+    var html = '<div class="card shadow p-3 mb-3 bg-white rounded " style="max-width: 20rem;">\n' +
+        '  <div class="card-header">Closed Ended Question</div>\n' +
+        '  <div class="card-body">\n' +
+        '    <h5 class="card-title">'+question+'</h5>\n' +
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var1 +
+        '  </label>\n' +
+        '</div>\n' +
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var2 +
+        '  </label>\n' +
+        '</div>\n'+
+        '<div class="form-check">\n' +
+        '  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">\n' +
+        '  <label class="form-check-label" for="defaultCheck1">\n' + var3 +
+        '  </label>\n' +
+        '</div>\n' +
+        '  </div>\n' +
+        '</div>';
+
+    document.getElementById('survey').innerHTML += html;
+
+    var FormID = {{formID}}
+    theUrl='/add_question?form_id=' + FormID + '&question=' + question + '&answers=' + var1 + ',' + var2 + ',' + var3;
+
+    var xmlHttp = new XMLHttpRequest();
+    while (!(xmlHttp.readyState == 4 && xmlHttp.status == 200)){
+      xmlHttp.open("GET", theUrl, true); // true for asynchronous
+      xmlHttp.send(null);
+      break;
+    }
+}
+   $(document).ready(function(){
+		$("#NameFeedback").modal({show: true, backdrop: 'static', keyboard: false});
+	});
+    document.getElementById('SaveOQ').addEventListener('click', openQuestion);
+    document.getElementById('SaveCQ').addEventListener('click', closedQuestion);
+    document.getElementById('SaveC').addEventListener('click', comment);
+</script>
 {% endblock %}
