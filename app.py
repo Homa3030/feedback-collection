@@ -55,6 +55,7 @@ class FormTemplate(db.Model):
 
 
 
+
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
@@ -104,14 +105,15 @@ def create_form(user, name):
     return str(new_template.id)
 
 
-@app.route('/save_form_as_template/<form_id>', methods=['POST'])
-def save_form_as_template(form_id):
+@app.route('/save_form_as_template/<form_id>/<name>', methods=['POST'])
+def save_form_as_template(form_id, name):
     ## My way
     ## here we only change the visibilty of form template without duplicating form_template 
     ## and all questions of this form_template
 
     form_temp = FormTemplate.query.filter_by(id=form_id).first()
     form_temp.visible = True
+    form_temp.label = str(name)
     db.session.commit()
     return "OK"
 
@@ -134,6 +136,20 @@ def save_form_as_template(form_id):
     #     db.session.add(new_question)
 
     # db.session.commit()
+
+@app.route('/fill_form/<form_id>', methods=['GET'])
+def get_all_questions(form_id):
+    q_array = FormTemplate.query.get(form_id).questions
+    list = []
+    for question in q_array:
+        dic = {
+            "id": question.id,
+            "question": question.question,
+            "answers": question.answers
+        }
+        list.append(dic)
+        print(dic)
+    return render_template('Survey.html', array=list)
 
 
 @app.route('/add_question', methods=['POST'])
@@ -199,6 +215,7 @@ def change_question(form_id, question_id, new_question_string, answers):
 
 @login_manager.user_loader
 def load_user(user_id):
+
     return User.get(user_id)
 
 
@@ -246,9 +263,20 @@ def forms(id):
         array.append(dic)
     return render_template('forms.html', title="My Feedback Form", list=json.dumps(array))
 
-@app.route("/Editor")
-def editor():
-    return render_template('Editor.html', title="Edit")
+@app.route("/Editor/<form_id>")
+def editor(form_id):
+    question_arr = Question.query.filter_by(template_id=form_id).all()
+    array = []
+    for temp in question_arr:
+        dic = {
+            "id": temp.id,
+            "question": temp.question,
+            "answers": temp.answers,
+            "template_id": temp.template_id
+        }
+        print(dic)
+        array.append(dic)
+    return render_template('Editor.html', title="Edit", list=json.dumps(array))
 
 @app.route("/")
 def home():

@@ -4,6 +4,10 @@
     <div  id="form"></div>
 
     <script>
+      $(window).one('beforeunload', function(ev){
+alert("ds");
+return;
+      });
 var user_id = {{current_user.id}};
 var i;
 var html;
@@ -11,7 +15,7 @@ var form =[1,2,3,4,5,6];
 form = {{list|safe}};
 for (i = 0; i < form.length; i++) {
   html = '<div class="list-group">\n' +
-      '  <a title= "Press to edit feedback form" href="/Editor" class="list-group-item list-group-item-action active mb-3 ">' + form[i].label + '</a>\n' +
+      '  <a title= "Press to edit feedback form" href="/Editor/' + form[i].id + '" class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded ">' + form[i].label + '</a>\n' +
       '</div>'
     document.getElementById('form').innerHTML += html;
 }

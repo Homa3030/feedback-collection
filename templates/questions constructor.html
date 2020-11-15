@@ -1,6 +1,27 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Question constructor</h2>
+<h2 id="header">Question constructor</h2>
+<div id="FeedbackName"></div>
+     <div id="NameFeedback" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please,enter the name of feedback form</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Name"id="Name" >
+                    </div>
+
+                     <a class="btn btn-secondary" href="/" role="button">Cancel</a>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="displayName()">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="btn-group">
 
       <button type="button" class="btn btn-primary dropdown-toggle mb-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -131,6 +152,12 @@
 </div>
 
 <script>
+   window.onbeforeunload = function(e) {
+     if (confirm("Data will be lost")){
+        
+     }
+     return "";
+ };
 function openQuestion() {
     var question = document.getElementById('Oquestion').value;
     var comment = document.getElementById('CommentO').value;
@@ -153,12 +180,12 @@ function openQuestion() {
         '  <div class="card-body">\n' +
         '    <h5 class="card-title">'+question+'</h5>\n' +
         '    <p class="text-muted">Comment: '+comment+'</p>\n' +
-        '    <button type="button" id="but'+ String(id)+'" class="btn btn-secondary remove-button-oq">Delete</button>\n'+
+        '    <button type="button" id="btn'+ String(id)+'" class="btn btn-secondary remove-button-oq">Delete</button>\n'+
         '  </div>\n' +
         '</div>';
 
     document.getElementById('survey').innerHTML += html;
-    $('#survey').on('click', '.remove-button-oq', function () {
+    $('#survey').on('click', '#btn' + id, function () {
        $(this).parent().parent().remove();
        xmlhttp = new XMLHttpRequest();
        theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
@@ -188,12 +215,12 @@ function comment() {
         '  <div class="card-header">Comment</div>\n' +
         '  <div class="card-body">\n' +
         '    <h5 class="card-title">'+comment_v+'</h5>\n' +
-        '    <button type="button" id="but'+ String(id)+'" class="btn btn-secondary remove-button-c">Delete</button>\n'+
+        '    <button type="button" id="btn'+ String(id)+'" class="btn btn-secondary remove-button-c">Delete</button>\n'+
         '  </div>\n' +
         '</div>';
 
     document.getElementById('survey').innerHTML += html;
-    $('#survey').on('click', '.remove-button-c', function () {
+    $('#survey').on('click', '#btn' + id, function () {
        $(this).parent().parent().remove();
        xmlhttp = new XMLHttpRequest();
       theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
@@ -248,7 +275,7 @@ function closedQuestion() {
     document.getElementById('survey').innerHTML += html;
 
 
-    $('#survey').on('click', '.remove-button-cq', function () {
+    $('#survey').on('click', '#btn' + id, function () {
        $(this).parent().parent().remove();
        xmlhttp = new XMLHttpRequest();
       theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
@@ -259,12 +286,20 @@ function closedQuestion() {
     
 }
 
+$(document).ready(function(){
+		$("#NameFeedback").modal({show: true, backdrop: 'static', keyboard: false});
+  });
+  function displayName() {
+    var html='<h3>' + document.getElementById('Name').value + '</h3>';
+   document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
+}
     document.getElementById('SaveOQ').addEventListener('click', openQuestion);
     document.getElementById('SaveCQ').addEventListener('click', closedQuestion);
     document.getElementById('SaveC').addEventListener('click', comment);
     document.getElementById('SaveTemp').addEventListener('click', function(){
       var id = {{formID}};
-      theUrl = '/save_form_as_template/' + id;
+      theUrl = '/save_form_as_template/' + id + '/' + document.getElementById('Name').value;
+      alert(document.getElementById('Name').value);
       xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", theUrl, false);
       xmlhttp.send();
