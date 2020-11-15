@@ -17,7 +17,7 @@
         <form>
           <div class="form-group">
             <label for="question" class="col-form-label">Question:</label>
-            <input type="text" class="form-control" id="Oquestion" value="">
+            <input type="text" class="form-control" id="Oquestion" value="gfhgfhgfhf">
           </div>
           <div class="form-group">
             <label for="message-text" class="col-form-label">Comment:</label>
@@ -38,13 +38,16 @@
    </div>
 
     <script>
+function display(form_id){
+
+    displayClosedQuestion()
+    displayOpenQuestion()
+}
 function displayOpenQuestion(question, comment) {
-    //var question = document.getElementById('Oquestion').value;
     var question = question;
-    //var comment = document.getElementById('CommentO').value;
     var comment = comment;
 
-    var html = '<div class="card mb-3" style="max-width: 20rem;">\n' +
+    var html = '<div class="card shadow p-3 mb-3 bg-white rounded" style="max-width: 20rem;">\n' +
         '  <div class="card-header">Open Ended Question</div>\n' +
         '  <div class="card-body">\n' +
         '    <h5 class="card-title">'+question+'</h5>\n' +
@@ -60,14 +63,14 @@ function editQuestion(id,question, comment){
 
     //var input = document.getElementById ("Oquestion");
     //input.placeholder = "No need to fill this field";
-    document.getElementById('Oquestion').value = "Johnny Bravo";
+    document.getElementById("Oquestion").value = "Johnny Bravo";
     ('#OpenEnded').modal('show');
 
 
 }
 function deleteQuestion(id){
     document.getElementById('edit').innerHTML = '';
-    displayClosedQuestion("sfsds","sf","dfd","dfd");
+
 }
 function displayClosedQuestion(question, var1,var2,var3) {
     var question = question;
@@ -103,6 +106,6 @@ function displayClosedQuestion(question, var1,var2,var3) {
 
 }
 displayOpenQuestion("dsfsfs","Sfsfsfs");
-displayClosedQuestion("sfsds","sf","dfd","dfd");
+displayOpenQuestion("sfsds","sf");
 </script>
 {% endblock %}
