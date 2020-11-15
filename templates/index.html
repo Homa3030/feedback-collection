@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
 {% if current_user.is_authenticated %}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<div class="content-section">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div class="content-section shadow p-3 mb-3 bg-white rounded">
+
   <div class="media">
-  <img class="rounded-circle account-img" src="static/default.png">
-  <div class="media-body">
-    <h2 class="account-heading">{{ current_user.name + " " + current_user.surname}} </h2>
-    <p class="text-secondary">{{ current_user.mail }} </p>
+    <img class="rounded-circle account-img" src="static/default.png">
+    <div class="media-body">
+      <h2 class="account-heading">{{ current_user.name + " " + current_user.surname}} </h2>
+      <p class="text-secondary">{{ current_user.mail }} </p>
+    </div>
   </div>
 </div>
     <p class="text-secondary">Rating </p>
@@ -17,10 +19,14 @@
     <span class="fa fa-star checked"></span>
     <span class="fa fa-star checked"></span>
 </div>
+
     <div>
        <a class="btn btn-primary" href="/constructor" role="button">Create survey</a>
+       <a class="btn btn-primary" href="/forms" role="button">Feedback Forms</a>
        <a class="btn btn-primary" href="/statistics" role="button">See Statistics</a>
+
     </div>
+
     {% else %}
 <h2>Unfortunately, you are not logged in</h2>
 <a class="btn btn-primary" href="/login" role="button">Log in</a>

@@ -1,6 +1,7 @@
+
 from flask import Flask, url_for, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func;
+from sqlalchemy import func
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
 from flask_migrate import Migrate
 import os
@@ -32,7 +33,7 @@ class User(UserMixin, db.Model):
     # 0 - DOE
     # 1 - Professor/TA
     # 2 - Student
-    def __repr__(self):
+    def repr(self):
         return '%s %s, %s' % (self.name, self.surname, self.mail)
 
 
@@ -43,12 +44,10 @@ class Question(db.Model):
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
     # If question is open-ended then answers = {} (empty array)
 
-
 class Answer(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), primary_key=True)
     filler_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     answer = db.Column(db.String, nullable=False)
-
 
 class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -165,6 +164,7 @@ def add_question():
 
     db.session.add(new_question)
     db.session.commit()
+    
     return True
 
 
@@ -226,6 +226,20 @@ def constructor():
 def statistics():
     return render_template('statistics.html', title="Statistics")
 
+@app.route("/forms")
+def forms():
+    return render_template('forms.html', title="My Feedback Form")
+
+@app.route("/Editor")
+def editor():
+    return render_template('Editor.html', title="Edit")
+
+@app.route("/Responds")
+def responds():
+    return render_template('Responds.html', title="Responds")
+@app.route("/Answers")
+def answers():
+    return render_template('Answers.html', title="Answers")
 
 @app.route("/")
 def home():
