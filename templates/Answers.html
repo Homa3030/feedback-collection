@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 id="header"></h2>
+    <div id="answers"></div>
+<script>
+function displayAnswer(){
+    var answer= [1,2,3,4]
+    for(i=0;i<answer.length;i++){
+         var html='<div class="card shadow p-3 mb-3 rounded">\n' +
+       '  <div class="card-body">\n' +
+       '    <blockquote class="blockquote mb-0">\n' +
+       '      <p>Question</p>\n' +
+       '      <footer class="blockquote-footer">Answer </blockquote>\n' +
+       '  </div>\n' +
+       '</div>'
+
+     document.getElementById("answers").innerHTML +=html;
+    }
+}
+function displayName(StudentName){
+    document.getElementById("header").innerHTML = "Answers of "+StudentName;
+}
+displayName("John")
+displayAnswer();
+</script>
+{% endblock %}
