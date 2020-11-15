@@ -4,7 +4,7 @@
     <div id="Student_survey">
 
     </div>
-    <button type="button" class="btn btn-primary" id="SaveFeedback" onclick="saveFeedback()">Save</button>
+    <button type="button" class="btn btn-primary" id="SaveFeedback" onclick="saveFeedback()">Submit</button>
     <script>
         display();
     function displayOpenEnded(question, qid){
@@ -14,7 +14,7 @@
         '    <form>\n' +
         '  <div class="form-group">\n' +
         '    <label style="font-size:20px">'+question +'</label>\n' +
-        '    <input type="text" class="form-control" id="OquestionAnswer" placeholder="Enter your answer">\n' +
+        '    <input type="text" class="form-control" id="OquestionAnswer'+ qid +'" placeholder="Enter your answer">\n' +
         '  </div>\n' +
         '  </form>\n' +
         ' </div>'

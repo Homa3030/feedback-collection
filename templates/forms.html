@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <h2>Your Surveys</h2>
+
     <div  id="form"></div>
 
     <script>
@@ -14,9 +15,16 @@ var html;
 var form =[1,2,3,4,5,6];
 form = {{list|safe}};
 for (i = 0; i < form.length; i++) {
-  html = '<div class="list-group">\n' +
-      '  <a title= "Press to edit feedback form" href="/Editor/' + form[i].id + '" class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded ">' + form[i].label + '</a>\n' +
-      '</div>'
+
+  html =
+      '<div class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded" style="height:65px">\n' +
+           '        <a style="padding: 0; border: none; background: none; font-size : 20px;" class="btn" href="/Editor/'+ form[i].id +'">\n' +
+      '            ' + form[i].label + ' '
+      '        </a>\n'+
+      '        <a href="/" style="float: right" class="btn btn-outline-primary">\n' +
+      '            Share\n' +
+      '        </a>\n' +
+      '    </div>'
     document.getElementById('form').innerHTML += html;
 }
 

@@ -278,6 +278,14 @@ def editor(form_id):
         array.append(dic)
     return render_template('Editor.html', title="Edit", list=json.dumps(array))
 
+@app.route("/Responds")
+def responds():
+    return render_template('Responds.html', title="Responds")
+@app.route("/Answers")
+def answers():
+    return render_template('Answers.html', title="Answers")
+
+
 @app.route("/")
 def home():
     return render_template('index.html', title='Home')
