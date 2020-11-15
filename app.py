@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func;
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
 from flask_migrate import Migrate
+from flask import abort
 import os
 
 db = SQLAlchemy()
@@ -60,10 +61,16 @@ class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
     author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
+
 
 @app.route('/create_form', methods=['POST'])
 def create_form():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     new_template = FormTemplate()
     new_template.visible = False
     db.session.add(new_template)
@@ -110,12 +117,24 @@ def get_form_page(form_id):
 
 @app.route('/get_relative_link/<form_id>', methods=['GET'])
 def get_relative_link(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 2:
+        abort(405)
+
     Form.query.get_or_404(form_id)
     return f'/fill_form/{form_id}'
 
 
 @app.route('/save_form_as_template/<form_id>', methods=['POST'])
 def save_form_as_template(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_template_id = Form.query.get(form_id).template_id
 
     new_form_template = FormTemplate()
@@ -136,6 +155,12 @@ def save_form_as_template(form_id):
 
 @app.route('/add_question', methods=['GET'])
 def add_question():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_id = request.args.get('form_id')
     question = request.args.get('question')
     answers_string = request.args.get('answers')
@@ -169,6 +194,12 @@ def add_question():
 
 
 def delete_question(form_id, question_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     questions = FormTemplate.query.get(form_id).questions
 
     for question in questions:
@@ -179,6 +210,12 @@ def delete_question(form_id, question_id):
 
 
 def change_question(form_id, question_id, new_question_string, answers):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     questions = FormTemplate.query.get(form_id).questions
 
     for question in questions:
@@ -218,12 +255,24 @@ def logout():
 
 @app.route("/constructor")
 def constructor():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_id = db.session.query(func.max(Form.id)).scalar()
     return render_template('questions constructor.html', title="Constructor", formID=form_id)
 
 
 @app.route("/statistics")
 def statistics():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     return render_template('statistics.html', title="Statistics")
 
 
