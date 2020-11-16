@@ -5,15 +5,18 @@
 var i;
 var html;
 var form =[1,2,3,4,5,6];
+form = {{user_list|safe}};
+console.log(form);
 for (i = 0; i < form.length; i++) {
       html =
           '    <div class="card shadow p-3 mb-3 rounded">\n' +
           '      <div class="card-body">\n' +
-          '        <h5 class="card-title">'+i+'</h5>\n' +
-          '        <a href="/Answers" class="btn btn-outline-primary">See Answers</a>\n' +
+          '        <h5 class="card-title">'+form[i].full_name+'</h5>\n' +
+          '        <a href="/Answers/'+ form[i].id +'/{{fid}}" class="btn btn-outline-primary">See Answers</a>\n' +
           '      </div>\n' +
-          '    </div>\n'
+          '    </div>\n';
 
-    document.getElementById('responds').innerHTML += html; }
+    document.getElementById('responds').innerHTML += html;
+}
 </script>
 {% endblock %}

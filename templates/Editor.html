@@ -36,21 +36,42 @@
    <div  id="edit">
 
    </div>
-<button type="button" class="btn btn-primary">
+<button type="button" class="btn btn-primary" id="save_edits">
  Save
 </button>
     <script>
+      $('#save_edits').on('click', function(){
+        for (i = 0; i < removable_questions_id.length; i++){
+          theUrl = '/delete_question?form_id={{temp_id}}&question_id=' + removable_questions_id[i];
+          xmlhttp = new XMLHttpRequest(); 
+          xmlhttp.open("POST", theUrl, false);
+          xmlhttp.send();
+        }
+        if (removable_questions_id.length == {{size|safe}}){
+          alert("Template succesfully deleted");
+          theUrl = '/delete_template/{{temp_id}}';
+          xmlhttp = new XMLHttpRequest(); 
+          xmlhttp.open("POST", theUrl, false);
+          xmlhttp.send();
+        }
+        // theUrl = '/forms/{{current_user.id}}';
+        //   xmlhttp = new XMLHttpRequest(); 
+        //   xmlhttp.open("GET", theUrl, false);
+        //   xmlhttp.send();
+        document.location.href = "/forms/{{current_user.id}}";
+      });
+
       var removable_questions_id = [];
       var questions = {{list|safe}};
       for (i = 0; i < questions.length; i++) {
         if (questions[i].answers.length == 0){
           displayOpenQuestion(questions[i].question, "Comment", questions[i].id);
         }else if (questions[i].answers.length == 1){
-          displayClosedQuestion(questions[i].question, question[i].answers[0], " ", " ");
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], " ", " ", questions[i].id );
         }else if (questions[i].answers.length == 2){
-          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], " ");
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], " ", questions[i].id);
         }else if (questions[i].answers.length == 3){
-          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], questions[i].answers[2]);
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], questions[i].answers[2], questions[i].id);
         }
       }
 function display(form_id){
@@ -76,7 +97,6 @@ function displayOpenQuestion(question, comment, id) {
     $('#edit').on('click', '#btn' + id, function(){
     $(this).parent().remove();
     removable_questions_id.push(id);
-    alert(removable_questions_id);
     });
 
 }
@@ -95,7 +115,7 @@ function editQuestion(id,question, comment){
 
 }
 
-function displayClosedQuestion(question, var1,var2,var3) {
+function displayClosedQuestion(question, var1,var2,var3, id) {
     var question = question;
     var var1 = var1;
     var var2 = var2;
@@ -120,11 +140,16 @@ function displayClosedQuestion(question, var1,var2,var3) {
         '  <label class="form-check-label" for="defaultCheck1">\n' + var3 +
         '  </label>\n' +
         '</div>\n' +
-        '  </div>\n' + '<button type="button" data-toggle="modal" data-target="#ClosedEnded" class="btn btn-primary mb-2">Edit</button>' +
-         '<button type="button" class="btn btn-danger">Delete</button>' +
+        '  </div>\n' + //'<button type="button" data-toggle="modal" data-target="#ClosedEnded" class="btn btn-primary mb-2">Edit</button>' +
+        '<button type="button" class="btn btn-danger" id="btn'+ id +'">Delete</button>' +
         '</div>';
 
     document.getElementById('edit').innerHTML += html;
+    $('#edit').on('click', '#btn' + id, function(){
+    alert("Works");
+    $(this).parent().remove();
+    removable_questions_id.push(id);
+    });
 
 
 }

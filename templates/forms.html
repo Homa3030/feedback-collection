@@ -5,10 +5,6 @@
     <div  id="form"></div>
 
     <script>
-      $(window).one('beforeunload', function(ev){
-alert("ds");
-return;
-      });
 var user_id = {{current_user.id}};
 var i;
 var html;
@@ -19,13 +15,28 @@ for (i = 0; i < form.length; i++) {
   html =
       '<div class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded" style="height:65px">\n' +
            '        <a style="padding: 0; border: none; background: none; font-size : 20px;" class="btn" href="/Editor/'+ form[i].id +'">\n' +
-      '            ' + form[i].label + ' '
+      '            ' + form[i].label + ' ' +
       '        </a>\n'+
-      '        <a href="/" style="float: right" class="btn btn-outline-primary">\n' +
+      '        <a style="float: right" class="btn btn-outline-primary" id="share'+ form[i].id +'">\n' +
       '            Share\n' +
       '        </a>\n' +
-      '    </div>'
+      '    </div>';
     document.getElementById('form').innerHTML += html;
+    $('#form').on('click', '#share'+form[i].id, function(){
+      temp_id = String($(this).get(0).id).substring(5);
+      var id;
+      theUrl = "/generate_form/" + temp_id;
+      xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        id = JSON.parse(xmlhttp.responseText)['form_id'];
+        alert("/fills_form/" + id);
+     }
+    };
+    xmlhttp.open("POST", theUrl, false);
+    xmlhttp.send();
+    });
+
 }
 
 </script>

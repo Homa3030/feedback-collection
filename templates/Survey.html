@@ -6,6 +6,7 @@
     </div>
     <button type="button" class="btn btn-primary" id="SaveFeedback" onclick="saveFeedback()">Submit</button>
     <script>
+        var list;
         display();
     function displayOpenEnded(question, qid){
     var question = question;
@@ -29,8 +30,8 @@
             '    <label style="font-size:20px">'+question +' </label>'
         for(i = 0; i < variants.length; i++){
             html+= '<div class="form-check">\n' +
-                '          <input class="form-check-input" type="radio" name="gridRadios" id="Variant" value="option1" checked>\n' +
-                '          <label style="font-size:16px" class="form-check-label" for=Variant>\n' + variants[i] +
+                '          <input class="form-check-input '+ qid +'" type="radio" name="gridRadios" id="Variant'+ i +'" value="option1" checked>\n' +
+                '          <label style="font-size:16px" class="form-check-label l'+ qid +'" for=Variant>\n' + variants[i] +
                 '          </label>\n' +
                 '        </div>'
 
@@ -42,12 +43,36 @@
         document.getElementById('Student_survey').innerHTML += html;
     }
 function saveFeedback(){
-
+    for (i = 0; i < list.length; i++) {
+        var temp_answ;
+        if (list[i].answers.length == 0){
+           temp_answ = document.getElementById('OquestionAnswer' + list[i].id).value;
+        }else{
+            var size = document.getElementsByClassName(list[i].id).length
+            var check = -1;
+            for (j = 0; j < size; j++){
+                if (document.getElementsByClassName(list[i].id)[j].checked){
+                    check = j;
+                    break;
+                }
+            }
+            if (check != -1){
+                temp_answ = document.getElementsByClassName('l' + list[i].id)[check].innerHTML;
+                alert(temp_answ);
+            }else{
+                continue;
+            }
+        }
+        theUrl = '/save_answer/{{current_user.id}}/{{fid}}/'+  + list[i].id + '/' + temp_answ;
+           xmlhttp = new XMLHttpRequest(); 
+           xmlhttp.open("POST", theUrl, false);
+           xmlhttp.send();
+    }
 }
 
 function display(){
     //form = {{formID}};
-    var list = {{array|safe}};
+    list = {{array|safe}};
     for (i = 0; i < list.length; i++) {
         if (list[i].answers.length == 0){
             displayOpenEnded(list[i].question, list[i].id);

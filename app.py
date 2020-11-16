@@ -45,48 +45,24 @@ class Question(db.Model):
     question_order = db.Column(db.Integer, default=0)
     # If question is open-ended then answers = {} (empty array)
 
+class Answer(db.Model):
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), primary_key=True)
+    filler_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    answer = db.Column(db.String, nullable=False)
+    form_id = db.Column(db.Integer, db.ForeignKey('form.id'), nullable=False)
 
 class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    questions = db.relationship('Question', backref='form_template')
+    questions = db.relationship('Question', backref='form_template_questions')
     visible = db.Column(db.Boolean, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     label = db.Column(db.String(32), nullable=False)
 
-
-
-
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
-
-
-class Result(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    form_id = db.Column(db.Integer, db.ForeignKey('form.id'))
-    grades = db.relationship('Grade', backref='grade_for_res')
-
-    @classmethod
-    def calculate_average(cls, id):
-        grades_arr = cls.query.get(id).grades
-        count = len(grades_arr)
-
-        if count == 0:
-            return 0
-        else:
-            return sum([g.grade for g in grades_arr]) / count
-
-
-class Grade(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    result_id = db.Column(db.Integer, db.ForeignKey('result.id'), nullable=False)
-    grade = db.Column(db.Integer, nullable=False)
-
-
-with app.app_context():
-    db.create_all()
-
-
+    answers = db.relationship('Answer', backref='form_answers')
+    
 ##@app.route('/create_form', methods=['POST'])
 def create_form(user, name):
     new_template = FormTemplate()
@@ -96,13 +72,44 @@ def create_form(user, name):
     db.session.add(new_template)
     db.session.commit()
 
-    new_form = Form()
-    new_form.template_id = new_template.id
-    db.session.add(new_form)
-    db.session.commit()
+    # new_form = Form()
+    # new_form.template_id = new_template.id
+    # db.session.add(new_form)
+    # db.session.commit()
 
 
     return str(new_template.id)
+
+@app.route('/fill_form/<form_id>', methods=['GET'])
+def get_form_page(form_id):
+    Form.query.get_or_404(form_id)
+    return f'Here should be a page to fill the form {form_id}.'
+
+
+@app.route('/get_relative_link/<form_id>', methods=['GET'])
+def get_relative_link(form_id):
+    Form.query.get_or_404(form_id)
+    return f'/fill_form/{form_id}'
+
+@app.route('/save_answer/<user_id>/<form_id>/<question_id>/<answer>', methods=['POST'])
+def save_answer(user_id,form_id, question_id, answer):
+    new_answ = Answer()
+    new_answ.filler_id = user_id
+    new_answ.question_id = question_id
+    new_answ.form_id = form_id
+    new_answ.answer = answer
+    db.session.add(new_answ)
+    db.session.commit()
+    return "ok"
+
+@app.route('/generate_form/<form_temp_id>', methods=['POST'])
+def generate(form_temp_id):
+    new_form = Form()
+    new_form.template_id = form_temp_id
+    db.session.add(new_form)
+    db.session.commit()
+    print(new_form.id)
+    return jsonify({"form_id": new_form.id})
 
 
 @app.route('/save_form_as_template/<form_id>/<name>', methods=['POST'])
@@ -137,9 +144,10 @@ def save_form_as_template(form_id, name):
 
     # db.session.commit()
 
-@app.route('/fill_form/<form_id>', methods=['GET'])
+@app.route('/fills_form/<form_id>', methods=['GET'])
 def get_all_questions(form_id):
-    q_array = FormTemplate.query.get(form_id).questions
+    temp_form_id = Form.query.filter_by(id=form_id).first().template_id
+    q_array = FormTemplate.query.get(temp_form_id).questions
     list = []
     for question in q_array:
         dic = {
@@ -149,7 +157,7 @@ def get_all_questions(form_id):
         }
         list.append(dic)
         print(dic)
-    return render_template('Survey.html', array=list)
+    return render_template('Survey.html', array=list, fid=form_id)
 
 
 @app.route('/add_question', methods=['POST'])
@@ -201,6 +209,13 @@ def delete_question():
             break
     return "Ok"
 
+@app.route('/delete_template/<temp_id>', methods=['POST'])
+def temp_delete(temp_id):
+    temp = FormTemplate.query.get(temp_id)
+    temp.visible = False
+    db.session.commit()
+    return "ok"
+
 
 def change_question(form_id, question_id, new_question_string, answers):
     questions = FormTemplate.query.get(form_id).questions
@@ -241,14 +256,27 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route("/constructor")
-def constructor():
-    return render_template('questions constructor.html', title="Constructor", formID=create_form(1, "template"))
+@app.route("/constructor/<user_id>")
+def constructor(user_id):
+    return render_template('questions constructor.html', title="Constructor", formID=create_form(user_id, "template"))
 
 
-@app.route("/statistics")
-def statistics():
-    return render_template('statistics.html', title="Statistics")
+@app.route("/statistics/<user>")
+def statistics(user):
+    form_temps = FormTemplate.query.filter_by(user_id=user, visible= True).all()
+    forms_array = []
+    for temp in form_temps:
+        forms = Form.query.filter_by(template_id=temp.id).all()
+        label = temp.label
+        i = 0
+        for form in forms:
+            dic = {
+                "id": form.id,
+                "label": label + '(' + str(form.id) + ')'
+             }
+            i += 1
+            forms_array.append(dic)
+    return render_template('statistics.html', title="Statistics", list= json.dumps(forms_array))
 
 @app.route("/forms/<id>")
 def forms(id):
@@ -267,6 +295,7 @@ def forms(id):
 def editor(form_id):
     question_arr = Question.query.filter_by(template_id=form_id).all()
     array = []
+    size = 0
     for temp in question_arr:
         dic = {
             "id": temp.id,
@@ -274,17 +303,46 @@ def editor(form_id):
             "answers": temp.answers,
             "template_id": temp.template_id
         }
+        size += 1
         print(dic)
         array.append(dic)
-    return render_template('Editor.html', title="Edit", list=json.dumps(array))
+    return render_template('Editor.html', title="Edit", list=json.dumps(array), temp_id=form_id, size= size)
 
-@app.route("/Responds")
-def responds():
-    return render_template('Responds.html', title="Responds")
-@app.route("/Answers")
-def answers():
-    return render_template('Answers.html', title="Answers")
+@app.route("/Responds/<form_id>", methods=['GET'])
+def responds(form_id):
+    form_template_id = Form.query.get(form_id).template_id
+    print(form_template_id)
+    answers = Form.query.get(form_id).answers
+    question0 = FormTemplate.query.get(form_template_id).questions[0].id
+    print(question0)
+    users=[]
+    answ_array=[]
+    for answer in answers:
+        if answer.question_id == question0:
+            user = User.query.get(answer.filler_id)
+            dic = {
+                "id": answer.filler_id,
+                "full_name" : user.name + " " + user.surname
+            }
+            users.append(dic)
+    print(users)
+    return render_template('Responds.html', title="Responds", user_list=json.dumps(users), fid=form_id)
 
+@app.route("/Answers/<filler_id>/<form_id>")
+def answers(filler_id, form_id):
+    answers = Answer.query.filter_by(filler_id=filler_id, form_id=form_id).all()
+    array = []
+    for answer in answers:
+        question_id = answer.question_id
+        question = Question.query.get(question_id)
+        dic = {
+            "q_label": question.question,
+            "ans_label": answer.answer
+        }
+        array.append(dic)
+        print(dic)
+    filler = User.query.get(filler_id)
+    return render_template('Answers.html', title="Answers", list = json.dumps(array), name = filler.name + " " + filler.surname)
 
 @app.route("/")
 def home():
