@@ -5,22 +5,23 @@
 <script>
 function displayAnswer(){
     var answer= [1,2,3,4]
+    answer = {{list|safe}}
     for(i=0;i<answer.length;i++){
          var html='<div class="card shadow p-3 mb-3 rounded">\n' +
        '  <div class="card-body">\n' +
        '    <blockquote class="blockquote mb-0">\n' +
-       '      <p>Question</p>\n' +
-       '      <footer class="blockquote-footer">Answer </blockquote>\n' +
+       '      <p>'+ answer[i].q_label+'</p>\n' +
+       '      <footer class="blockquote-footer">'+ answer[i].ans_label +'</blockquote>\n' +
        '  </div>\n' +
        '</div>'
 
      document.getElementById("answers").innerHTML +=html;
     }
 }
-function displayName(StudentName){
-    document.getElementById("header").innerHTML = "Answers of "+StudentName;
+function displayName(){
+    document.getElementById("header").innerHTML = "Answers of {{name}}";
 }
-displayName("John")
+displayName()
 displayAnswer();
 </script>
 {% endblock %}

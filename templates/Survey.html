@@ -6,21 +6,23 @@
     </div>
     <button type="button" class="btn btn-primary" id="SaveFeedback" onclick="saveFeedback()">Submit</button>
     <script>
-    function displayOpenEnded(question){
+        var list;
+        display();
+    function displayOpenEnded(question, qid){
     var question = question;
 
     var html = '<div class="content-section shadow p-3 mb-3 bg-white rounded">\n' +
         '    <form>\n' +
         '  <div class="form-group">\n' +
         '    <label style="font-size:20px">'+question +'</label>\n' +
-        '    <input type="text" class="form-control" id="OquestionAnswer" placeholder="Enter your answer">\n' +
+        '    <input type="text" class="form-control" id="OquestionAnswer'+ qid +'" placeholder="Enter your answer">\n' +
         '  </div>\n' +
         '  </form>\n' +
         ' </div>'
 
     document.getElementById('Student_survey').innerHTML += html;
     }
-    function displayClosedEnded(question, variants){
+    function displayClosedEnded(question, variants, qid){
 
         var html ='<div class="content-section mb-3">\n' +
             '    <form>\n' +
@@ -28,8 +30,8 @@
             '    <label style="font-size:20px">'+question +' </label>'
         for(i = 0; i < variants.length; i++){
             html+= '<div class="form-check">\n' +
-                '          <input class="form-check-input" type="radio" name="gridRadios" id="Variant" value="option1" checked>\n' +
-                '          <label style="font-size:16px" class="form-check-label" for=Variant>\n' + variants[i] +
+                '          <input class="form-check-input '+ qid +'" type="radio" name="gridRadios" id="Variant'+ i +'" value="option1" checked>\n' +
+                '          <label style="font-size:16px" class="form-check-label l'+ qid +'" for=Variant>\n' + variants[i] +
                 '          </label>\n' +
                 '        </div>'
 
@@ -40,10 +42,49 @@
 
         document.getElementById('Student_survey').innerHTML += html;
     }
-function saveFeedback(){}
-    displayOpenEnded("How's the weather");
-    displayOpenEnded("Anything good?");
-    displayOpenEnded("What is your plan?");
-    displayClosedEnded("Was it difficult?",['yes','no','50/50']);
+function saveFeedback(){
+    for (i = 0; i < list.length; i++) {
+        var temp_answ;
+        if (list[i].answers.length == 0){
+           temp_answ = document.getElementById('OquestionAnswer' + list[i].id).value;
+        }else{
+            var size = document.getElementsByClassName(list[i].id).length
+            var check = -1;
+            for (j = 0; j < size; j++){
+                if (document.getElementsByClassName(list[i].id)[j].checked){
+                    check = j;
+                    break;
+                }
+            }
+            if (check != -1){
+                temp_answ = document.getElementsByClassName('l' + list[i].id)[check].innerHTML;
+                alert(temp_answ);
+            }else{
+                continue;
+            }
+        }
+        theUrl = '/save_answer/{{current_user.id}}/{{fid}}/'+  + list[i].id + '/' + temp_answ;
+           xmlhttp = new XMLHttpRequest(); 
+           xmlhttp.open("POST", theUrl, false);
+           xmlhttp.send();
+    }
+}
+
+function display(){
+    //form = {{formID}};
+    list = {{array|safe}};
+    for (i = 0; i < list.length; i++) {
+        if (list[i].answers.length == 0){
+            displayOpenEnded(list[i].question, list[i].id);
+        }else{
+            displayClosedEnded(list[i].question, list[i].answers, list[i].id);
+        }
+    }
+
+}
+    //displayOpenEnded("How's the weather");
+    //displayOpenEnded("Anything good?");
+    //displayOpenEnded("What is your plan?");
+    //displayClosedEnded("Was it difficult?",['yes','no','50/50']);
     </script>
 {% endblock %}

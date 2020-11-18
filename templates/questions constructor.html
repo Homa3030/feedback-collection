@@ -145,66 +145,115 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <a class="btn btn-primary" href="/" role="button">Finish</a>
+        <a class="btn btn-primary" href="/" role="button" id="SaveTemp">Finish</a>
       </div>
     </div>
   </div>
 </div>
 
-    <script>
+<script>
+//    window.onbeforeunload = function(e) {
+//      if (confirm("Data will be lost")){
+        
+//      }
+//      return "";
+//  };
 function openQuestion() {
     var question = document.getElementById('Oquestion').value;
     var comment = document.getElementById('CommentO').value;
+    var id;
+  
 
-    var html = '<div class="card shadow p-3 mb-3 bg-white rounded " style="max-width: 20rem;">\n' +
+    var FormID = {{formID}};
+    //alert(FormID);
+    theUrl='/add_question?form_id=' + FormID + '&question=' + question;
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        id = JSON.parse(xmlhttp.responseText)['id'];
+     }
+    };
+    xmlhttp.open("POST", theUrl, false);
+    xmlhttp.send(); 
+    
+    var html = '<div class="card mb-3" id="oq'+ String(id) +'" style="max-width: 20rem;">\n' +
         '  <div class="card-header">Open Ended Question</div>\n' +
         '  <div class="card-body">\n' +
         '    <h5 class="card-title">'+question+'</h5>\n' +
         '    <p class="text-muted">Comment: '+comment+'</p>\n' +
+        '    <button type="button" id="btn'+ String(id)+'" class="btn btn-secondary remove-button-oq">Delete</button>\n'+
         '  </div>\n' +
         '</div>';
 
     document.getElementById('survey').innerHTML += html;
-
-    var FormID = {{formID}}
-    theUrl='/add_question?form_id=' + FormID + '&question=' + question;
-
-    var xmlHttp = new XMLHttpRequest();
-    while (!(xmlHttp.readyState == 4 && xmlHttp.status == 200)){
-      xmlHttp.open("GET", theUrl, true); // true for asynchronous
-      xmlHttp.send(null);
-      break;
-    }
-
+    $('#survey').on('click', '#btn' + id, function () {
+       $(this).parent().parent().remove();
+       xmlhttp = new XMLHttpRequest();
+       theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
+       xmlhttp.open("POST", theUrl, false);
+       xmlhttp.send();
+     });
+    
 }
 function displayName() {
     var html='<h3>' + document.getElementById('Name').value + '</h3>';
    document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
 }
 function comment() {
-    var comment = document.getElementById('Comment1').value;
+    var comment_v = document.getElementById('Comment1').value;
+    var id;
 
+    var FormID = {{formID}};
+    theUrl='/add_question?form_id=' + FormID + '&question=' + comment_v;
 
-    var html = '<div class="card shadow p-3 mb-3 bg-white rounded" style="max-width: 20rem;">\n' +
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+     id = JSON.parse(xmlhttp.responseText)['id'];
+    }
+    };
+    xmlhttp.open("POST", theUrl, false);
+    xmlhttp.send();
+
+    var html = '<div class="card mb-3" style="max-width: 20rem;" id="com'+String(id) +'">\n' +
         '  <div class="card-header">Comment</div>\n' +
         '  <div class="card-body">\n' +
-        '    <h5 class="card-title">'+comment+'</h5>\n' +
+        '    <h5 class="card-title">'+comment_v+'</h5>\n' +
+        '    <button type="button" id="btn'+ String(id)+'" class="btn btn-secondary remove-button-c">Delete</button>\n'+
         '  </div>\n' +
         '</div>';
 
     document.getElementById('survey').innerHTML += html;
-
-
-
+    $('#survey').on('click', '#btn' + id, function () {
+       $(this).parent().parent().remove();
+       xmlhttp = new XMLHttpRequest();
+      theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
+      xmlhttp.open("POST", theUrl, false);
+      xmlhttp.send();
+     });
 
 }
+
 function closedQuestion() {
     var question = document.getElementById('Cquestion').value;
     var var1 = document.getElementById('Variant1').value;
     var var2 = document.getElementById('Variant2').value;
     var var3 = document.getElementById('Variant3').value;
+    var id;
 
-    var html = '<div class="card shadow p-3 mb-3 bg-white rounded " style="max-width: 20rem;">\n' +
+    var FormID = {{formID}};
+    theUrl='/add_question?form_id=' + FormID + '&question=' + question + '&answers=' + var1 + ',' + var2 + ',' + var3;
+
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        id = JSON.parse(xmlhttp.responseText)['id'];
+     }
+    };
+    xmlhttp.open("POST", theUrl, false);
+    xmlhttp.send();
+
+    var html = '<div class="card mb-3" id="cq'+ String(id)+'" style="max-width: 20rem;">\n' +
         '  <div class="card-header">Closed Ended Question</div>\n' +
         '  <div class="card-body">\n' +
         '    <h5 class="card-title">'+question+'</h5>\n' +
@@ -223,25 +272,40 @@ function closedQuestion() {
         '  <label class="form-check-label" for="defaultCheck1">\n' + var3 +
         '  </label>\n' +
         '</div>\n' +
+        '<button type="button" id="btn'+String(id)+'" class="btn btn-secondary remove-button-cq">Delete</button>\n'+
         '  </div>\n' +
         '</div>';
 
     document.getElementById('survey').innerHTML += html;
 
-    var FormID = {{formID}}
-    theUrl='/add_question?form_id=' + FormID + '&question=' + question + '&answers=' + var1 + ',' + var2 + ',' + var3;
 
-    var xmlHttp = new XMLHttpRequest();
-    while (!(xmlHttp.readyState == 4 && xmlHttp.status == 200)){
-      xmlHttp.open("GET", theUrl, true); // true for asynchronous
-      xmlHttp.send(null);
-      break;
-    }
+    $('#survey').on('click', '#btn' + id, function () {
+       $(this).parent().parent().remove();
+       xmlhttp = new XMLHttpRequest();
+      theUrl = "/delete_question?form_id=" + FormID + "&question_id=" + id;
+      xmlhttp.open("POST", theUrl, false);
+      xmlhttp.send();
+     });
 }
-   $(document).ready(function(){
+
+$(document).ready(function(){
 		$("#NameFeedback").modal({show: true, backdrop: 'static', keyboard: false});
-	});
+  });
+  function displayName() {
+    var html='<h3>' + document.getElementById('Name').value + '</h3>';
+   document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
+}
     document.getElementById('SaveOQ').addEventListener('click', openQuestion);
     document.getElementById('SaveCQ').addEventListener('click', closedQuestion);
     document.getElementById('SaveC').addEventListener('click', comment);
+    document.getElementById('SaveTemp').addEventListener('click', function(){
+      var id = {{formID}};
+      theUrl = '/save_form_as_template/' + id + '/' + document.getElementById('Name').value;
+      alert(document.getElementById('Name').value);
+      xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", theUrl, false);
+      xmlhttp.send();
+    });
+    
 </script>
+{% endblock %}

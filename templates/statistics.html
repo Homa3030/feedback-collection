@@ -5,13 +5,21 @@
 <script>
 var i;
 var html;
-var form =[1,2,3,4,5,6];
-for (i = 0; i < form.length; i++) {
+var forms =[1,2,3,4,5,6];
+forms = {{list|safe}};
+for (i = 0; i < forms.length; i++) {
 
   var html =
-      '  <a title= "Press to edit feedback form" href="/Responds" class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded">' + form[i] + '</a>\n'
+      '  <a href="/Responds/'+ forms[i].id+'" class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded" id="fb'+ forms[i].id +'">' + forms[i].label + '</a>\n';
 
     document.getElementById('form').innerHTML += html;
+    $('#form').on('click', '#fb' + forms[i].id, function(){
+      temp_id = $(this).get(0).id;
+      theUrl = '/Responds/' + String(temp_id).substring(2);
+      xmlhttp = new XMLHttpRequest(); 
+      xmlhttp.open("GET", theUrl, true);
+      xmlhttp.send();
+    });
 }
 
 </script>

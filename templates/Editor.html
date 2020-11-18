@@ -36,44 +36,86 @@
    <div  id="edit">
 
    </div>
-<button type="button" class="btn btn-primary">
+<button type="button" class="btn btn-primary" id="save_edits">
  Save
 </button>
     <script>
+      $('#save_edits').on('click', function(){
+        for (i = 0; i < removable_questions_id.length; i++){
+          theUrl = '/delete_question?form_id={{temp_id}}&question_id=' + removable_questions_id[i];
+          xmlhttp = new XMLHttpRequest(); 
+          xmlhttp.open("POST", theUrl, false);
+          xmlhttp.send();
+        }
+        if (removable_questions_id.length == {{size|safe}}){
+          alert("Template succesfully deleted");
+          theUrl = '/delete_template/{{temp_id}}';
+          xmlhttp = new XMLHttpRequest(); 
+          xmlhttp.open("POST", theUrl, false);
+          xmlhttp.send();
+        }
+        // theUrl = '/forms/{{current_user.id}}';
+        //   xmlhttp = new XMLHttpRequest(); 
+        //   xmlhttp.open("GET", theUrl, false);
+        //   xmlhttp.send();
+        document.location.href = "/forms/{{current_user.id}}";
+      });
+
+      var removable_questions_id = [];
+      var questions = {{list|safe}};
+      for (i = 0; i < questions.length; i++) {
+        if (questions[i].answers.length == 0){
+          displayOpenQuestion(questions[i].question, "Comment", questions[i].id);
+        }else if (questions[i].answers.length == 1){
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], " ", " ", questions[i].id );
+        }else if (questions[i].answers.length == 2){
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], " ", questions[i].id);
+        }else if (questions[i].answers.length == 3){
+          displayClosedQuestion(questions[i].question, questions[i].answers[0], questions[i].answers[1], questions[i].answers[2], questions[i].id);
+        }
+      }
 function display(form_id){
 
     displayClosedQuestion()
     displayOpenQuestion()
 }
-function displayOpenQuestion(question, comment) {
+function displayOpenQuestion(question, comment, id) {
     var question = question;
     var comment = comment;
 
-    var html = '<div class="card shadow p-3 mb-3 bg-white rounded" style="max-width: 20rem;">\n' +
+    var html = '<div class="card shadow p-3 mb-3 bg-white rounded" style="max-width: 20rem;" id="oq' + id + '">\n' +
         '  <div class="card-header">Open Ended Question</div>\n' +
         '  <div class="card-body">\n' +
-        '    <h5 class="card-title">'+question+'</h5>\n' +
+        '    <h5 class="card-title" id= "oq_q' + id + '">'+question+'</h5>\n' +
         '    <p class="text-muted">Comment: '+comment+'</p>\n' +
-        '  </div>\n' + '<button type="button" data-toggle="modal" data-target="#OpenEnded" onclick="editQuestion(1,"question","comment")" class="btn btn-primary mb-2">Edit</button>' +
-         '<button type="button" onclick="deleteQuestion()" class="btn btn-danger">Delete</button>'
+        '  </div>\n' +
+        //'<button type="button" data-toggle="modal" data-target="#OpenEnded" onclick="editQuestion(1,question,comment)" class="btn btn-primary mb-2">Edit</button>\n' +
+        '<button type="button" id="btn' + id + '"class="btn btn-danger remove-button-cq">Delete</button>\n' +
         '</div>';
 
     document.getElementById('edit').innerHTML += html;
+    $('#edit').on('click', '#btn' + id, function(){
+    $(this).parent().remove();
+    removable_questions_id.push(id);
+    });
 
 }
 function editQuestion(id,question, comment){
 
     //var input = document.getElementById ("Oquestion");
     //input.placeholder = "No need to fill this field";
+    document.getElementById("Oquestion").value = "Johnny Bravo";
+  
     ('#OpenEnded').modal('show');
+    ('#OpenEnded').on('show.bs.modal', function(event){
+      alert("cool");
+    });
+    //$('#OpenEnded #Oquestion').val("blabla");
 
 
 }
-function deleteQuestion(id){
-    document.getElementById('edit').innerHTML = '';
 
-}
-function displayClosedQuestion(question, var1,var2,var3) {
+function displayClosedQuestion(question, var1,var2,var3, id) {
     var question = question;
     var var1 = var1;
     var var2 = var2;
@@ -98,15 +140,18 @@ function displayClosedQuestion(question, var1,var2,var3) {
         '  <label class="form-check-label" for="defaultCheck1">\n' + var3 +
         '  </label>\n' +
         '</div>\n' +
-        '  </div>\n' + '<button type="button" data-toggle="modal" data-target="#ClosedEnded" class="btn btn-primary mb-2">Edit</button>' +
-         '<button type="button" class="btn btn-danger">Delete</button>' +
+        '  </div>\n' + //'<button type="button" data-toggle="modal" data-target="#ClosedEnded" class="btn btn-primary mb-2">Edit</button>' +
+        '<button type="button" class="btn btn-danger" id="btn'+ id +'">Delete</button>' +
         '</div>';
 
     document.getElementById('edit').innerHTML += html;
+    $('#edit').on('click', '#btn' + id, function(){
+    alert("Works");
+    $(this).parent().remove();
+    removable_questions_id.push(id);
+    });
 
 
 }
-displayOpenQuestion("dsfsfs","Sfsfsfs");
-displayOpenQuestion("sfsds","sf");
 </script>
 {% endblock %}
