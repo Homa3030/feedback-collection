@@ -64,11 +64,17 @@ class Form(db.Model):
     answers = db.relationship('Answer', backref='form_answers')
     
 ##@app.route('/create_form', methods=['POST'])
-def create_form(user, name):
+def create_form_template(user_id, name):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     new_template = FormTemplate()
     new_template.visible = False
-    new_template.user_id = user
-    new_template.label = name + str(new_template.id)
+    new_template.user_id = user_id
+    new_template.label = name
     db.session.add(new_template)
     db.session.commit()
 
@@ -93,6 +99,9 @@ def get_relative_link(form_id):
 
 @app.route('/save_answer/<user_id>/<form_id>/<question_id>/<answer>', methods=['POST'])
 def save_answer(user_id,form_id, question_id, answer):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     new_answ = Answer()
     new_answ.filler_id = user_id
     new_answ.question_id = question_id
@@ -104,8 +113,29 @@ def save_answer(user_id,form_id, question_id, answer):
 
 @app.route('/generate_form/<form_temp_id>', methods=['POST'])
 def generate(form_temp_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
+    new_form_template = FormTemplate()
+    new_form_template.visible = False
+    current_template = FormTemplate.query.get(form_temp_id)
+    user_id = current_template.user_id
+    new_form_template.user_id = user_id
+    label = current_template.label
+    new_form_template.label = label
+    db.session.add(new_form_template)
+    db.session.commit()
+    questions = current_template.questions
+    for question in questions:
+        new_question = Question()
+        new_question.question = question.question
+        new_question.answers = question.answers
+        new_question.template_id = new_form_template.id
+        db.session.add(new_question)
     new_form = Form()
-    new_form.template_id = form_temp_id
+    new_form.template_id = new_form_template.id
     db.session.add(new_form)
     db.session.commit()
     print(new_form.id)
@@ -114,6 +144,10 @@ def generate(form_temp_id):
 
 @app.route('/save_form_as_template/<form_id>/<name>', methods=['POST'])
 def save_form_as_template(form_id, name):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
     ## My way
     ## here we only change the visibilty of form template without duplicating form_template 
     ## and all questions of this form_template
@@ -146,6 +180,9 @@ def save_form_as_template(form_id, name):
 
 @app.route('/fills_form/<form_id>', methods=['GET'])
 def get_all_questions(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     temp_form_id = Form.query.filter_by(id=form_id).first().template_id
     q_array = FormTemplate.query.get(temp_form_id).questions
     list = []
@@ -162,6 +199,11 @@ def get_all_questions(form_id):
 
 @app.route('/add_question', methods=['POST'])
 def add_question():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_id = request.args.get('form_id')
     question = request.args.get('question')
     answers_string = request.args.get('answers')
@@ -198,6 +240,11 @@ def add_question():
 
 @app.route('/delete_question', methods=['POST'])
 def delete_question():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_id = request.args.get('form_id')
     question_id = request.args.get('question_id')
     questions = FormTemplate.query.get(form_id).questions
@@ -211,21 +258,15 @@ def delete_question():
 
 @app.route('/delete_template/<temp_id>', methods=['POST'])
 def temp_delete(temp_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     temp = FormTemplate.query.get(temp_id)
     temp.visible = False
     db.session.commit()
     return "ok"
-
-
-def change_question(form_id, question_id, new_question_string, answers):
-    questions = FormTemplate.query.get(form_id).questions
-
-    for question in questions:
-        if int(question.id) == int(question_id):
-            question.question = new_question_string
-            question.answers = answers
-            db.session.commit()
-            break
 
 
 @login_manager.user_loader
@@ -258,12 +299,22 @@ def logout():
 
 @app.route("/constructor/<user_id>")
 def constructor(user_id):
-    return render_template('questions constructor.html', title="Constructor", formID=create_form(user_id, "template"))
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
+    return render_template('questions constructor.html', title="Constructor", formID=create_form_template(user_id, "Feedback"))
 
 
 @app.route("/statistics/<user>")
 def statistics(user):
-    form_temps = FormTemplate.query.filter_by(user_id=user, visible= True).all()
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
+    form_temps = FormTemplate.query.filter_by(user_id=user, visible= False).all()
     forms_array = []
     for temp in form_temps:
         forms = Form.query.filter_by(template_id=temp.id).all()
@@ -278,8 +329,14 @@ def statistics(user):
             forms_array.append(dic)
     return render_template('statistics.html', title="Statistics", list= json.dumps(forms_array))
 
+
 @app.route("/forms/<id>")
 def forms(id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     own_temp = FormTemplate.query.filter_by(user_id=id, visible=True).all()
     array = []
     for temp in own_temp:
@@ -291,8 +348,14 @@ def forms(id):
         array.append(dic)
     return render_template('forms.html', title="My Feedback Form", list=json.dumps(array))
 
+
 @app.route("/Editor/<form_id>")
 def editor(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     question_arr = Question.query.filter_by(template_id=form_id).all()
     array = []
     size = 0
@@ -308,8 +371,14 @@ def editor(form_id):
         array.append(dic)
     return render_template('Editor.html', title="Edit", list=json.dumps(array), temp_id=form_id, size= size)
 
+
 @app.route("/Responds/<form_id>", methods=['GET'])
 def responds(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_template_id = Form.query.get(form_id).template_id
     print(form_template_id)
     answers = Form.query.get(form_id).answers
@@ -330,6 +399,11 @@ def responds(form_id):
 
 @app.route("/Answers/<filler_id>/<form_id>")
 def answers(filler_id, form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     answers = Answer.query.filter_by(filler_id=filler_id, form_id=form_id).all()
     array = []
     for answer in answers:
@@ -344,9 +418,16 @@ def answers(filler_id, form_id):
     filler = User.query.get(filler_id)
     return render_template('Answers.html', title="Answers", list = json.dumps(array), name = filler.name + " " + filler.surname)
 
+
 @app.route("/")
 def home():
     return render_template('index.html', title='Home')
+
+@app.route("/thanks")
+def thanks():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template('thank_you.html', title='Thank you')
 
 
 if __name__ == "__main__":

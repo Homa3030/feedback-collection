@@ -11,6 +11,7 @@
           <p class="text-secondary">{{ current_user.mail }} </p>
         </div>
       </div>
+
         <p class="text-secondary">Rating </p>
         <span class="fa fa-star checked"></span>
         <span class="fa fa-star checked"></span>
@@ -18,22 +19,14 @@
         <span class="fa fa-star checked"></span>
         <span class="fa fa-star checked"></span>
     </div>
-
-  <!-- </div>
-    <p class="text-secondary">Rating </p>
-    <span class="fa fa-star checked"></span>
-    <span class="fa fa-star checked"></span>
-    <span class="fa fa-star checked"></span>
-    <span class="fa fa-star checked"></span>
-    <span class="fa fa-star checked"></span>
-</div> -->
-
+    {% if current_user.type!=2 %}
     <div>
        <a class="btn btn-primary" href="/constructor/{{current_user.id}}" role="button">Create survey</a>
        <a class="btn btn-primary" href="/forms/{{current_user.id}}" role="button">Feedback Forms</a>
        <a class="btn btn-primary" href="/statistics/{{current_user.id}}" role="button">See Statistics</a>
-
+   
     </div>
+    {% endif %}
 
     {% else %}
 <h2>Unfortunately, you are not logged in</h2>
