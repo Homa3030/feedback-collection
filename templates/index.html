@@ -10,14 +10,18 @@
           <h2 class="account-heading">{{ current_user.name + " " + current_user.surname}} </h2>
           <p class="text-secondary">{{ current_user.mail }} </p>
         </div>
-      </div>
-
-        <p class="text-secondary">Rating </p>
+{% if current_user.type != 2 %}
+  <div>
+    <h2 label style="font-size:20px; margin-top: 14%;" align="center">Rating</h2>
+    <h3 class="account-heading" >{{grade}}</h3>
+  </div>
+{% endif %}     
+        <!-- <p class="text-secondary">Rating </p>
         <span class="fa fa-star checked"></span>
         <span class="fa fa-star checked"></span>
         <span class="fa fa-star checked"></span>
         <span class="fa fa-star checked"></span>
-        <span class="fa fa-star checked"></span>
+        <span class="fa fa-star checked"></span> -->
     </div>
     {% if current_user.type!=2 %}
     <div>
@@ -26,6 +30,10 @@
        <a class="btn btn-primary" href="/statistics/{{current_user.id}}" role="button">See Statistics</a>
    
     </div>
+
+    <script>
+      console.log({{list|safe}});
+    </script>
     {% endif %}
 
     {% else %}

@@ -1,7 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2 id="header"></h2>
-    <div id="answers"></div>
+    <div id="answers">
+
+        <div class="card shadow p-3 mb-3 rounded">
+            <div class="card-body">
+                <blockquote class="blockquote mb-0">
+                    <p>Lesson feedback:</p>
+                    <footer class="blockquote-footer">{{grade}}</footer>
+                </blockquote>
+            </div>
+        </div>
+
+    </div>
 <script>
 function displayAnswer(){
     var answer= [1,2,3,4]

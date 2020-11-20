@@ -2,10 +2,50 @@
 {% block content %}
     <h2>Survey</h2>
     <div id="Student_survey">
+        <div class="content-section shadow p-3 mb-3 bg-white rounded">
+
+            <label style="font-size:20px">Rate the instructor</label>
+              <input type="range" class="custom-range" min="0" max="5" step="1" id="grade_section"  value="4" onchange="updateTextInput(this.value);">
+               <div id="Meaning">
+                  <p class="text-secondary">4 (Good)</p>
+               </div>
+        </div>
+        
+
+    <!-- <div class="content-section shadow p-3 mb-3 bg-white rounded">
+        <form>
+            <div class="form-group">
+                <label style="font-size: 20px;">Rate the lesson(from 0 to 5):</label>
+                <input type="text" pattern="\d{1}" maxlength="1" name="pincode" id="grade_section" class="form-control">
+            </div>
+        </form>
+    </div> -->
 
     </div>
     <button type="button" href="/thanks" class="btn btn-primary" id="SaveFeedback" onclick="saveFeedback()">Submit</button>
     <script>
+        function updateTextInput(val) {
+    var meaning="";
+    if (val==0){
+        meaning="0 (Very bad)"
+    }
+    if (val==1){
+        meaning="1 (Bad)"
+    }
+    if (val==2){
+        meaning="2 (Need improvement)"
+    }
+    if (val==3){
+        meaning="3 (Satisfactory)"
+    }
+    if (val==4){
+        meaning="4 (Good)"
+    }
+    if (val==5){
+        meaning="5 (Excellent)"
+    }
+      document.getElementById('Meaning').innerHTML='<p class="text-secondary">'+meaning +'</p>';
+    }
         var list;
         display();
     function displayOpenEnded(question, qid){
@@ -43,6 +83,16 @@
     }
 
 function saveFeedback(){
+    var grade = parseInt(document.getElementById('grade_section').value);
+    if (isNaN(grade) || grade>5 || grade<0){
+        alert('Please specify the integer number[0,5] in the first question');
+        return;
+    }else{
+        theUrl = '/save_grade/{{current_user.id}}/{{fid}}/'+ grade;
+           xmlhttp = new XMLHttpRequest(); 
+           xmlhttp.open("POST", theUrl, false);
+           xmlhttp.send();
+    }
     for (i = 0; i < list.length; i++) {
         var temp_answ;
         if (list[i].answers.length == 0){
