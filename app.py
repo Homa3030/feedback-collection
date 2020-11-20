@@ -1,8 +1,9 @@
 from flask import Flask, url_for, render_template, request, redirect, session, jsonify, json
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func;
+from sqlalchemy import func
 from flask_login import LoginManager, current_user, login_user, logout_user, UserMixin
 from flask_migrate import Migrate
+from flask import abort
 import os
 
 db = SQLAlchemy()
@@ -72,7 +73,9 @@ class Form(db.Model):
     answers = db.relationship('Answer', backref='form_answers')
     
 
+
 def create_form_template(user_id, name):
+
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
 
@@ -95,6 +98,12 @@ def get_form_page(form_id):
 
 @app.route('/get_relative_link/<form_id>', methods=['GET'])
 def get_relative_link(form_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    if current_user.type != 2:
+        abort(405)
+  
     Form.query.get_or_404(form_id)
     return f'/fill_form/{form_id}'
 
@@ -170,7 +179,9 @@ def save_form_as_template(form_id, name):
     form_temp.label = str(name)
     db.session.commit()
 
+
     return "OK"
+
 
 @app.route('/fills_form/<form_id>', methods=['GET'])
 def get_all_questions(form_id):
@@ -198,6 +209,7 @@ def get_all_questions(form_id):
 def add_question():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
 
@@ -229,11 +241,12 @@ def add_question():
 
     db.session.add(new_question)
     db.session.commit()
+    
+    return True
 
     ret = db.session.query(func.max(Question.id)).scalar()
 
     return jsonify({"id" : ret})
-
 
 @app.route('/delete_question', methods=['POST'])
 def delete_question():
@@ -265,6 +278,7 @@ def temp_delete(temp_id):
     db.session.commit()
     return "ok"
 
+
 @app.route('/delete_form/<form_id>', methods=['POST'])
 def form_delete(form_id):
     if not current_user.is_authenticated:
@@ -283,6 +297,7 @@ def form_delete(form_id):
     db.session.commit()
     template = FormTemplate.query.get(cur_form.template_id)
     questions = template.questions
+
     for question in questions:
         db.session.delete(question)
     db.session.commit()
@@ -315,10 +330,12 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 @app.route("/constructor/<user_id>")
 def constructor(user_id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
 
@@ -328,10 +345,12 @@ def constructor(user_id):
 def statistics(user):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
 
     form_temps = FormTemplate.query.filter_by(user_id=user, visible= False).all()
+
     forms_array = []
     grade_list =  []
     for temp in form_temps:
@@ -362,8 +381,10 @@ def statistics(user):
 def forms(id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
+
 
     own_temp = FormTemplate.query.filter_by(user_id=id, visible=True).all()
     array = []
@@ -381,8 +402,10 @@ def forms(id):
 def editor(form_id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
+
 
     question_arr = Question.query.filter_by(template_id=form_id).all()
     array = []
@@ -404,8 +427,10 @@ def editor(form_id):
 def responds(form_id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
+
 
     form_template_id = Form.query.get(form_id).template_id
     answers = Form.query.get(form_id).answers
@@ -427,8 +452,10 @@ def responds(form_id):
 def answers(filler_id, form_id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
+
 
     answers = Answer.query.filter_by(filler_id=filler_id, form_id=form_id).all()
     array = []
@@ -441,6 +468,7 @@ def answers(filler_id, form_id):
         }
         array.append(dic)
     filler = User.query.get(filler_id)
+
     grade = Grade.query.filter_by(user_id=filler_id, form_id=form_id).first().grade
     grade_str = ""
     if grade == 0:
@@ -457,6 +485,7 @@ def answers(filler_id, form_id):
         grade_str="Excellent"
 
     return render_template('Answers.html', title="Answers", list = json.dumps(array), name = filler.name + " " + filler.surname, grade=grade_str)
+
 
 @app.route("/")
 def home():
