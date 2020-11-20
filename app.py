@@ -408,10 +408,8 @@ def responds(form_id):
         abort(405)
 
     form_template_id = Form.query.get(form_id).template_id
-    print(form_template_id)
     answers = Form.query.get(form_id).answers
     question0 = FormTemplate.query.get(form_template_id).questions[0].id
-    print(question0)
     users=[]
     answ_array=[]
     for answer in answers:

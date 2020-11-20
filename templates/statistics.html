@@ -36,7 +36,7 @@ for (i = 0; i < forms.length; i++) {
   var html =
       '<div class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded">\n' +
       '  <a href="/Responds/'+ forms[i].id+'" style="padding: 0; border: none; background: none; font-size : 20px;" class="btn" id="fb'+ forms[i].id +'">' + forms[i].label + '<br> Average grade:' +grades[i] + '</a>\n' +
-      '  <button type="button" id="btn' + forms[i].id + '"class="btn btn-danger remove-button-cq btnRemForm" style="float:right">Delete</button>\n' +
+      '  <button type="button" id="btn' + forms[i].id + '"class="btn btn-danger remove-button-cq btnRemForm" style="margin-top:2%;float:right">Delete</button>\n' +
       '</div>'; 
 
     document.getElementById('form').innerHTML += html;
@@ -52,13 +52,12 @@ for (i = 0; i < forms.length; i++) {
       $('#exampleModal').modal('show');
       form_id = $(this).get(0).id;
       $('#DeleteForm').on('click', function(){
-        $('#btn' + form_id).parent().remove();
+        $('#btn' + String(form_id).substring(3)).parent().remove();
         theUrl = '/delete_form/' + String(form_id).substring(3);
         xmlhttp = new XMLHttpRequest(); 
         xmlhttp.open("POST", theUrl, true);
         xmlhttp.send();
         $('#exampleModal').modal('hide');
-        document.location.reload();
       });
     });
 }
