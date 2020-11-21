@@ -165,7 +165,6 @@ function openQuestion() {
   
 
     var FormID = {{formID}};
-    //alert(FormID);
     theUrl='/add_question?form_id=' + FormID + '&question=' + question;
     xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -196,7 +195,6 @@ function openQuestion() {
     
 }
 function displayName() {
-    var html='<h3>' + document.getElementById('Name').value + '</h3>';
    document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
 }
 function comment() {
@@ -291,17 +289,13 @@ function closedQuestion() {
 $(document).ready(function(){
 		$("#NameFeedback").modal({show: true, backdrop: 'static', keyboard: false});
   });
-  function displayName() {
-    var html='<h3>' + document.getElementById('Name').value + '</h3>';
-   document.getElementById("header").innerHTML = "Question constructor for "+document.getElementById('Name').value ;
-}
+
     document.getElementById('SaveOQ').addEventListener('click', openQuestion);
     document.getElementById('SaveCQ').addEventListener('click', closedQuestion);
     document.getElementById('SaveC').addEventListener('click', comment);
     document.getElementById('SaveTemp').addEventListener('click', function(){
       var id = {{formID}};
       theUrl = '/save_form_as_template/' + id + '/' + document.getElementById('Name').value;
-      alert(document.getElementById('Name').value);
       xmlhttp = new XMLHttpRequest();
       xmlhttp.open("POST", theUrl, false);
       xmlhttp.send();

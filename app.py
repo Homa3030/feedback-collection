@@ -43,14 +43,21 @@ class Question(db.Model):
     question = db.Column(db.String, nullable=False)
     answers = db.Column(db.ARRAY(db.String), nullable=False)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
-    question_order = db.Column(db.Integer, default=0)
     # If question is open-ended then answers = {} (empty array)
+
 
 class Answer(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), primary_key=True)
     filler_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     answer = db.Column(db.String, nullable=False)
     form_id = db.Column(db.Integer, db.ForeignKey('form.id'), nullable=False)
+
+
+class Grade(db.Model):
+    form_id = db.Column(db.Integer, db.ForeignKey('form.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    grade = db.Column(db.Integer, nullable=False)
+
 
 class FormTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,33 +66,35 @@ class FormTemplate(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     label = db.Column(db.String(32), nullable=False)
 
+
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     template_id = db.Column(db.Integer, db.ForeignKey('form_template.id'), nullable=False)
     answers = db.relationship('Answer', backref='form_answers')
     
-##@app.route('/create_form', methods=['POST'])
-def create_form_template(user, name):
+
+
+def create_form_template(user_id, name):
+
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-      
+
     new_template = FormTemplate()
     new_template.visible = False
-    new_template.user_id = user
-    new_template.label = name + str(new_template.id)
+    new_template.user_id = user_id
+    new_template.label = name
     db.session.add(new_template)
     db.session.commit()
-    
+
     return str(new_template.id)
 
 @app.route('/fill_form/<form_id>', methods=['GET'])
 def get_form_page(form_id):
     Form.query.get_or_404(form_id)
     return f'Here should be a page to fill the form {form_id}.'
-
 
 @app.route('/get_relative_link/<form_id>', methods=['GET'])
 def get_relative_link(form_id):
@@ -100,6 +109,9 @@ def get_relative_link(form_id):
 
 @app.route('/save_answer/<user_id>/<form_id>/<question_id>/<answer>', methods=['POST'])
 def save_answer(user_id,form_id, question_id, answer):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     new_answ = Answer()
     new_answ.filler_id = user_id
     new_answ.question_id = question_id
@@ -107,52 +119,79 @@ def save_answer(user_id,form_id, question_id, answer):
     new_answ.answer = answer
     db.session.add(new_answ)
     db.session.commit()
+
+    return "ok"
+
+@app.route('/save_grade/<user_id>/<form_id>/<grade>', methods=['POST'])
+def save_grade(user_id, form_id, grade):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
+    new_grade = Grade()
+    new_grade.form_id = form_id
+    new_grade.user_id = user_id
+    new_grade.grade = grade
+    db.session.add(new_grade)
+    db.session.commit()
+
     return "ok"
 
 @app.route('/generate_form/<form_temp_id>', methods=['POST'])
 def generate(form_temp_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
+    new_form_template = FormTemplate()
+    new_form_template.visible = False
+    current_template = FormTemplate.query.get(form_temp_id)
+    user_id = current_template.user_id
+    new_form_template.user_id = user_id
+    label = current_template.label
+    new_form_template.label = label
+    db.session.add(new_form_template)
+    db.session.commit()
+    questions = current_template.questions
+    for question in questions:
+        new_question = Question()
+        new_question.question = question.question
+        new_question.answers = question.answers
+        new_question.template_id = new_form_template.id
+        db.session.add(new_question)
     new_form = Form()
-    new_form.template_id = form_temp_id
+    new_form.template_id = new_form_template.id
     db.session.add(new_form)
     db.session.commit()
     print(new_form.id)
-    return jsonify({"form_id": new_form.id})
 
+    return jsonify({"form_id": new_form.id})
 
 @app.route('/save_form_as_template/<form_id>/<name>', methods=['POST'])
 def save_form_as_template(form_id, name):
-    ## My way
-    ## here we only change the visibilty of form template without duplicating form_template 
-    ## and all questions of this form_template
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
 
     form_temp = FormTemplate.query.filter_by(id=form_id).first()
     form_temp.visible = True
     form_temp.label = str(name)
     db.session.commit()
+
+
     return "OK"
 
-    ## Regina way
-    ## here we create new form_template and also duplicate all questions(related to form_template with form_id)
-
-    # form_template_id = Form.query.get(form_id).template_id
-
-    # new_form_template = FormTemplate()
-    # new_form_template.visible = True
-    # db.session.add(new_form_template)
-
-    # questions = FormTemplate.query.get(form_template_id).questions
-
-    # for question in questions:
-    #     new_question = Question()
-    #     new_question.question = question.question
-    #     new_question.answers = question.answers
-    #     new_question.template_id = new_form_template.id
-    #     db.session.add(new_question)
-    # db.session.commit()
 
 @app.route('/fills_form/<form_id>', methods=['GET'])
 def get_all_questions(form_id):
-    temp_form_id = Form.query.filter_by(id=form_id).first().template_id
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    temp_form = Form.query.filter_by(id=form_id).first()
+    if temp_form == None:
+        return "<h1>Invalid link</h1>"
+    temp_form_id = temp_form.template_id
     q_array = FormTemplate.query.get(temp_form_id).questions
     list = []
     for question in q_array:
@@ -162,7 +201,7 @@ def get_all_questions(form_id):
             "answers": question.answers
         }
         list.append(dic)
-        print(dic)
+
     return render_template('Survey.html', array=list, fid=form_id)
 
 
@@ -206,11 +245,16 @@ def add_question():
     return True
 
     ret = db.session.query(func.max(Question.id)).scalar()
-    print(ret)
+
     return jsonify({"id" : ret})
 
 @app.route('/delete_question', methods=['POST'])
 def delete_question():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     form_id = request.args.get('form_id')
     question_id = request.args.get('question_id')
     questions = FormTemplate.query.get(form_id).questions
@@ -224,34 +268,47 @@ def delete_question():
 
 @app.route('/delete_template/<temp_id>', methods=['POST'])
 def temp_delete(temp_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    if current_user.type != 0 and current_user.type != 1:
+        abort(405)
+
     temp = FormTemplate.query.get(temp_id)
     temp.visible = False
     db.session.commit()
     return "ok"
 
 
-def change_question(form_id, question_id, new_question_string, answers):
+@app.route('/delete_form/<form_id>', methods=['POST'])
+def form_delete(form_id):
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
-
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-
-    questions = FormTemplate.query.get(form_id).questions
+    
+    cur_form = Form.query.get(form_id)
+    answers = cur_form.answers
+    for answer in answers:
+        db.session.delete(answer)
+    db.session.commit()
+    grades = Grade.query.filter_by(form_id=form_id).all()
+    for grade in grades:
+        db.session.delete(grade)
+    db.session.commit()
+    template = FormTemplate.query.get(cur_form.template_id)
+    questions = template.questions
 
     for question in questions:
-        if int(question.id) == int(question_id):
-            question.question = new_question_string
-            question.answers = answers
-            db.session.commit()
-            break
-
+        db.session.delete(question)
+    db.session.commit()
+    db.session.delete(cur_form)
+    db.session.delete(template)
+    db.session.commit()
+    return "ok"
 
 @login_manager.user_loader
 def load_user(user_id):
-
     return User.get(user_id)
-
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -268,12 +325,10 @@ def login():
 
             return render_template('incorrect.html', title='Invalid credentials')
 
-
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for('home'))
-
 
 
 @app.route("/constructor/<user_id>")
@@ -283,9 +338,8 @@ def constructor(user_id):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
-    return render_template('questions constructor.html', title="Constructor", formID=create_form(user_id, "template"))
 
+    return render_template('questions constructor.html', title="Constructor", formID=create_form_template(user_id, "Feedback"))
 
 @app.route("/statistics/<user>")
 def statistics(user):
@@ -294,9 +348,11 @@ def statistics(user):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
-    form_temps = FormTemplate.query.filter_by(user_id=user, visible= True).all()
+
+    form_temps = FormTemplate.query.filter_by(user_id=user, visible= False).all()
+
     forms_array = []
+    grade_list =  []
     for temp in form_temps:
         forms = Form.query.filter_by(template_id=temp.id).all()
         label = temp.label
@@ -308,7 +364,18 @@ def statistics(user):
              }
             i += 1
             forms_array.append(dic)
-    return render_template('statistics.html', title="Statistics", list= json.dumps(forms_array))
+
+            grades = Grade.query.filter_by(form_id=form.id).all()
+            if len(grades) == 0:
+                grade_list.append(0)
+            else:
+                sum = 0
+                count = len(grades)
+                for grade in grades:
+                    sum += grade.grade
+                grade_list.append(sum/count)
+
+    return render_template('statistics.html', title="Statistics", list= json.dumps(forms_array), grade_list= json.dumps(grade_list))
 
 @app.route("/forms/<id>")
 def forms(id):
@@ -317,7 +384,8 @@ def forms(id):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
+
+
     own_temp = FormTemplate.query.filter_by(user_id=id, visible=True).all()
     array = []
     for temp in own_temp:
@@ -327,6 +395,7 @@ def forms(id):
         }
         print(dic)
         array.append(dic)
+
     return render_template('forms.html', title="My Feedback Form", list=json.dumps(array))
 
 @app.route("/Editor/<form_id>")
@@ -336,7 +405,8 @@ def editor(form_id):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
+
+
     question_arr = Question.query.filter_by(template_id=form_id).all()
     array = []
     size = 0
@@ -350,6 +420,7 @@ def editor(form_id):
         size += 1
         print(dic)
         array.append(dic)
+
     return render_template('Editor.html', title="Edit", list=json.dumps(array), temp_id=form_id, size= size)
 
 @app.route("/Responds/<form_id>", methods=['GET'])
@@ -359,12 +430,11 @@ def responds(form_id):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
+
+
     form_template_id = Form.query.get(form_id).template_id
-    print(form_template_id)
     answers = Form.query.get(form_id).answers
     question0 = FormTemplate.query.get(form_template_id).questions[0].id
-    print(question0)
     users=[]
     answ_array=[]
     for answer in answers:
@@ -375,7 +445,7 @@ def responds(form_id):
                 "full_name" : user.name + " " + user.surname
             }
             users.append(dic)
-    print(users)
+
     return render_template('Responds.html', title="Responds", user_list=json.dumps(users), fid=form_id)
 
 @app.route("/Answers/<filler_id>/<form_id>")
@@ -385,7 +455,8 @@ def answers(filler_id, form_id):
 
     if current_user.type != 0 and current_user.type != 1:
         abort(405)
-        
+
+
     answers = Answer.query.filter_by(filler_id=filler_id, form_id=form_id).all()
     array = []
     for answer in answers:
@@ -396,13 +467,53 @@ def answers(filler_id, form_id):
             "ans_label": answer.answer
         }
         array.append(dic)
-        print(dic)
     filler = User.query.get(filler_id)
-    return render_template('Answers.html', title="Answers", list = json.dumps(array), name = filler.name + " " + filler.surname)
+
+    grade = Grade.query.filter_by(user_id=filler_id, form_id=form_id).first().grade
+    grade_str = ""
+    if grade == 0:
+        grade_str="Very bad"
+    elif grade == 1:
+        grade_str="Bad"
+    elif grade == 2:
+        grade_str="Need improvement"
+    elif grade == 3:
+        grade_str="Satisfactory"
+    elif grade == 4:
+        grade_str="Good"
+    elif grade == 5:
+        grade_str="Excellent"
+
+    return render_template('Answers.html', title="Answers", list = json.dumps(array), name = filler.name + " " + filler.surname, grade=grade_str)
+
+
 @app.route("/")
 def home():
-    return render_template('index.html', title='Home')
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
+    final_grade = 0
+    if current_user.type != 2:
+        size = 0
+        sum = 0
+        form_templates = FormTemplate.query.filter_by(user_id=current_user.id).all()
+        for template in form_templates:
+            forms = Form.query.filter_by(template_id=template.id).all()
+            for form in forms:
+                temp_grades = Grade.query.filter_by(form_id=form.id).all()
+                for grade in temp_grades:
+                    sum += grade.grade
+                    size += 1
+        if size != 0:
+            final_grade = round(sum/size,2)
 
+    return render_template('index.html', title='Home', grade=final_grade)
+
+@app.route("/thanks")
+def thanks():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template('thank_you.html', title='Thank you')
 
 if __name__ == "__main__":
     app.secret_key = "123"

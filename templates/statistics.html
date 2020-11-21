@@ -2,23 +2,63 @@
 {% block content %}
 <h2>Available results</h2>
      <div  id="form"></div>
+
+    <!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="DeleteForm">Finish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 var i;
 var html;
 var forms =[1,2,3,4,5,6];
+var grades =[1,2,3,4,5,6];
 forms = {{list|safe}};
+grades = {{grade_list|safe}}
 for (i = 0; i < forms.length; i++) {
 
   var html =
-      '  <a href="/Responds/'+ forms[i].id+'" class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded" id="fb'+ forms[i].id +'">' + forms[i].label + '</a>\n';
+      '<div class="btn btn-light btn-lg btn-block shadow p-3 mb-3 bg-white rounded">\n' +
+      '  <a href="/Responds/'+ forms[i].id+'" style="padding: 0; border: none; background: none; font-size : 20px;" class="btn" id="fb'+ forms[i].id +'">' + forms[i].label + '<br> Average grade:' +grades[i] + '</a>\n' +
+      '  <button type="button" id="btn' + forms[i].id + '"class="btn btn-danger remove-button-cq btnRemForm" style="margin-top:2%;float:right">Delete</button>\n' +
+      '</div>'; 
 
     document.getElementById('form').innerHTML += html;
     $('#form').on('click', '#fb' + forms[i].id, function(){
-      temp_id = $(this).get(0).id;
-      theUrl = '/Responds/' + String(temp_id).substring(2);
+      form_id = $(this).get(0).id;
+      theUrl = '/Responds/' + String(form_id).substring(2);
       xmlhttp = new XMLHttpRequest(); 
       xmlhttp.open("GET", theUrl, true);
       xmlhttp.send();
+    });
+
+    $('#form').on('click', '#btn' + forms[i].id, function(){
+      $('#exampleModal').modal('show');
+      form_id = $(this).get(0).id;
+      $('#DeleteForm').on('click', function(){
+        $('#btn' + String(form_id).substring(3)).parent().remove();
+        theUrl = '/delete_form/' + String(form_id).substring(3);
+        xmlhttp = new XMLHttpRequest(); 
+        xmlhttp.open("POST", theUrl, true);
+        xmlhttp.send();
+        $('#exampleModal').modal('hide');
+      });
     });
 }
 
