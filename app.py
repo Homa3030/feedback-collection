@@ -241,8 +241,6 @@ def add_question():
 
     db.session.add(new_question)
     db.session.commit()
-    
-    return True
 
     ret = db.session.query(func.max(Question.id)).scalar()
 
